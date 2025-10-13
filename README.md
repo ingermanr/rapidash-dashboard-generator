@@ -1,6 +1,8 @@
 # 📊 Rapidash Dashboard Generator
 
 > **Generador inteligente de dashboards** con múltiples variantes de layouts, visualizaciones de datos y exportación a PDF.
+> 
+> *Creado con [v0 by Vercel](https://v0.dev)*
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.2-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
@@ -401,13 +403,13 @@ npm start
 
 ## 📝 Licencia
 
-Este proyecto es privado y de uso interno.
+Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
 ## 👨‍💻 Autor
 
-**Rapidash Team**
+**Germán Alonso Rodríguez** - [@ingermanr](https://github.com/ingermanr)
 
 ---
 
