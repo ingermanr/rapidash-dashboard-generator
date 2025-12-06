@@ -4,7 +4,7 @@
 > 
 > *Creado con [v0 by Vercel](https://v0.dev)*
 
-![Next.js](https://img.shields.io/badge/Next.js-15.2-black?logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-15.5.7-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?logo=tailwind-css)
