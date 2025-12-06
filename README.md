@@ -379,7 +379,7 @@ npm start
 
 | Paquete | Versión | Propósito |
 |---------|---------|-----------|
-| Next.js | 15.2.4 | Framework React |
+| Next.js | 15.5.7 | Framework React |
 | React | 19 | UI Library |
 | TypeScript | 5 | Type Safety |
 | Tailwind CSS | 4.1.9 | Styling |
