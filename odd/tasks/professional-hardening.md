@@ -19,7 +19,8 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T5 (S1) GitHub Actions CI — inline — 94920cd
 - [x] T6a (S2) Extract variant generation from `app/page.tsx` to `lib/domain/variant-generator.ts` with injected `random`/`now` + seeded RNG + tests — inline
 - [x] T6b (S2) Extract mock data generation from `components/dashboard-detailed-preview.tsx` to `lib/domain/` with injected RNG + tests — inline
-- [ ] T7 (S3) UI split + behavior tests
+- [x] T7a (S3) Split `dashboard-detailed-preview.tsx` (container + `components/dashboard-preview/*` + `lib/pdf/`) + behavior tests — inline
+- [ ] T7b (S3) Split `app/page.tsx` views + behavior tests — inline
 - [ ] T8 (S4) Product improvements (pending definition)
 
 Route evidence: phase 1 units are small and sequential; no writer trigger applies.
@@ -38,3 +39,4 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L10 (2026-11-13) User: "adelante" (phase 2). T6a: logic moved verbatim except `Math.random()`→`random()` (15) and `Date.now()`→`now()` (7). Differential check vs main: identical variants for 5 variable sets × 30 seeds. Found dead branch in `getSuitableLayouts` (7-9 range shadowed by 7-8 and 9-10).
 - L11 T6b: sample data moved to `lib/domain/sample-data.ts`; components seed it with `randomFor(combination.id)`. Fixes: values re-randomized on every render (UI test RED on old component, GREEN now); "trimestre" matched "mes" (now quarters first). Differential check vs main: 1400 identical cases (names without "trimestre").
 - L12 (2026-11-13) User: "dale, pero recuerda que estamos mejorando la herramienta, si hay que mejorar lo que sea, lo mejoramos". The "dead branch" was a bug: LARGE range constants were 7-9 instead of 11-15 (RED 3 → GREEN). New engine coverage test (1-30 combinations, every suitable layout) found "Staggered" overlapping from 6+ cards (blocks span 2 rows but advanced 1); fixed. 109/109 tests.
+- L13 (2026-11-13) User: "dale" (phase 3). T7a: scripted split by verified line ranges; preview 1810 → 234 lines. Differential vs original: identical HTML (React ids normalized) and identical jsPDF call log for 60 variants, 16 layouts, 8 chart types, 42,923 calls. PDF errors now use a destructive toast instead of `alert()` (RED on old). Finding for phase 4: filters only change local state; no chart reads them.

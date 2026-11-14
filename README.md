@@ -115,14 +115,22 @@ dashboard-generator/
 │   └── globals.css          # Estilos globales
 │
 ├── components/              # Componentes React
-│   ├── dashboard-detailed-preview.tsx  # Vista detallada
+│   ├── dashboard-detailed-preview.tsx  # Contenedor de la vista detallada
+│   ├── dashboard-preview/              # Piezas de la vista detallada
+│   │   ├── charts/                     # Un componente por tipo de gráfico
+│   │   ├── combination-card.tsx        # Tarjeta de una visualización
+│   │   ├── dashboard-grid.tsx          # Render del layout en el grid
+│   │   ├── filter-card.tsx             # Filtro por variable
+│   │   └── independent-variable-card.tsx
 │   ├── layout-preview.tsx              # Preview de layouts
 │   ├── variable-input.tsx              # Input de variables
 │   ├── theme-toggle.tsx                # Toggle de tema
 │   └── ui/                             # Primitivas UI (shadcn/ui + Radix)
 │
-├── lib/                     # Lógica de negocio
-│   ├── layout-engine.ts     # Motor de generación de layouts
+├── lib/                     # Lógica sin React
+│   ├── domain/              # Generación de variantes, datos de ejemplo y RNG con semilla
+│   ├── pdf/                 # Exportación de la especificación a PDF
+│   ├── layout-engine.ts     # Motor de layouts (grid de 12 columnas)
 │   └── utils.ts             # Utilidades
 │
 ├── store/                   # Estado global (Zustand)
