@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { LayoutGrid, TrendingUp, Info, Eye, Check, X } from "lucide-react"
 import type { LayoutVariant } from "@/types/dashboard"
-import { getRealLayoutDivisions, generateGridStyles, getGridDimensions, analyzeLayoutQuality, GRID_CONFIG } from "@/lib/layout-engine"
+import { getRealLayoutDivisions, generateGridStyles, getGridDimensions, analyzeLayoutQuality } from "@/lib/layout-engine"
 
 interface LayoutPreviewProps {
   variant: LayoutVariant

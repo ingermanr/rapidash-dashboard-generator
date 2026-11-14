@@ -232,7 +232,7 @@ describe('PDF Generation', () => {
     }))
     
     // Temporarily replace the mock
-    require('@/store').useDashboardInfo = mockUseDashboardInfo
+    jest.requireMock<{ useDashboardInfo: unknown }>('@/store').useDashboardInfo = mockUseDashboardInfo
 
     render(<DashboardDetailedPreview variant={mockVariant} />)
     

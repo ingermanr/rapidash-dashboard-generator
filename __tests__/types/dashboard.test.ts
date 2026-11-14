@@ -95,7 +95,7 @@ describe('Dashboard Types', () => {
           id: 'combo-1',
           numericVariable: numericVar,
           name: `Test ${chartType}`,
-          chartType: chartType as any
+          chartType: chartType as VariableCombination['chartType']
         }
 
         expect(combination.chartType).toBe(chartType)
