@@ -73,60 +73,35 @@ Tipos de gráficos soportados:
 ## 🚀 Inicio Rápido
 
 ### Requisitos Previos
-- **Node.js** 18.20.8 o superior
-- **pnpm** (recomendado) o npm
+- **Node.js** 24 LTS (ver `.nvmrc`; mínimo 20.9)
+- **npm** (único gestor de paquetes; el lockfile es `package-lock.json`)
 
 ### Instalación
 
 ```bash
-# Clonar el repositorio
-git clone <repository-url>
-cd dashboard-generator
-
-# Instalar dependencias
-pnpm install
-# o
-npm install
+git clone https://github.com/ingermanr/rapidash-dashboard-generator.git
+cd rapidash-dashboard-generator
+nvm use        # opcional, usa la versión de .nvmrc
+npm ci
 ```
 
-### Desarrollo
+### Scripts
 
-```bash
-# Iniciar servidor de desarrollo
-pnpm dev
-# o
-npm run dev
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo en http://localhost:3000 |
+| `npm run build` | Build de producción |
+| `npm start` | Servidor de producción |
+| `npm run typecheck` | Verificación de tipos (`tsc --noEmit`) |
+| `npm run lint` | ESLint con cero warnings permitidos |
+| `npm test` | Tests con Jest |
+| `npm run test:watch` | Tests en modo watch |
+| `npm run test:coverage` | Reporte de cobertura |
+| `npm run verify` | Typecheck + lint + tests + build (lo mismo que corre el CI) |
 
-# Abrir http://localhost:3000
-```
+### Integración Continua
 
-### Producción
-
-```bash
-# Construir para producción
-pnpm build
-npm run build
-
-# Iniciar servidor de producción
-pnpm start
-npm start
-```
-
-### Testing
-
-```bash
-# Ejecutar todos los tests
-pnpm test
-npm test
-
-# Ejecutar tests en modo watch
-pnpm test:watch
-npm run test:watch
-
-# Generar reporte de cobertura
-pnpm test:coverage
-npm run test:coverage
-```
+GitHub Actions (`.github/workflows/ci.yml`) ejecuta typecheck, lint, tests y build en cada push a `main` y en cada pull request.
 
 ---
 
@@ -143,9 +118,8 @@ dashboard-generator/
 │   ├── dashboard-detailed-preview.tsx  # Vista detallada
 │   ├── layout-preview.tsx              # Preview de layouts
 │   ├── variable-input.tsx              # Input de variables
-│   ├── theme-provider.tsx              # Provider de temas
 │   ├── theme-toggle.tsx                # Toggle de tema
-│   └── ui/                             # Componentes UI (Radix)
+│   └── ui/                             # Primitivas UI (shadcn/ui + Radix)
 │
 ├── lib/                     # Lógica de negocio
 │   ├── layout-engine.ts     # Motor de generación de layouts
@@ -160,7 +134,6 @@ dashboard-generator/
 │   └── dashboard.ts         # Tipos del dashboard
 │
 ├── hooks/                   # React hooks
-│   ├── use-mobile.ts        # Detección mobile
 │   └── use-toast.ts         # Sistema de toasts
 │
 ├── __tests__/               # Tests
@@ -274,7 +247,6 @@ interface LayoutVariant {
 ## 🧪 Testing
 
 ### Cobertura Actual
-- ✅ **85.7%** de tests pasando
 - ✅ Tests de componentes
 - ✅ Tests de utilidades
 - ✅ Tests de tipos
@@ -295,21 +267,7 @@ __tests__/
 
 ## 🎨 Componentes UI
 
-El proyecto utiliza **Radix UI** con componentes personalizados:
-
-- Accordion, Alert Dialog, Avatar
-- Badge, Breadcrumb, Button
-- Card, Carousel, Chart
-- Checkbox, Collapsible, Command
-- Dialog, Drawer, Dropdown Menu
-- Form, Input, Label
-- Navigation Menu, Pagination
-- Popover, Progress, Radio Group
-- Select, Separator, Sheet
-- Skeleton, Slider, Switch
-- Table, Tabs, Textarea
-- Toast, Tooltip, Toggle
-- Y más...
+Las primitivas viven en `components/ui/` (estilo shadcn/ui sobre Radix): `Badge`, `Button`, `Card`, `Input`, `Select`, `Textarea` y `Toast`. Solo se mantienen las que se usan; para agregar otra, usa `npx shadcn@latest add <componente>` (la configuración está en `components.json`).
 
 ---
 

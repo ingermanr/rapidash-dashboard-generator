@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased]
+
+### Infraestructura
+- CI con GitHub Actions: typecheck, lint, tests y build en cada push a `main` y en cada PR.
+- Nuevos scripts `typecheck` y `verify`; `lint` usa ESLint directamente con `--max-warnings=0`.
+- ESLint migrado a flat config (`eslint.config.mjs`) con `next/core-web-vitals` y `next/typescript`.
+- npm como único gestor de paquetes (eliminado `pnpm-lock.yaml`).
+- Node 24 LTS vía `.nvmrc` (`engines.node >=20.9`); eliminado el pin de Volta a Node 18 (EOL).
+- Finales de línea LF forzados con `.gitattributes`.
+
+### Limpieza
+- Eliminadas 37 dependencias y 44 componentes de `components/ui` que no se usaban.
+- Eliminadas ~800 líneas de layouts y helpers de PDF que no se usaban en la vista detallada.
+- Eliminados los `console.log` de depuración.
+
+### Correcciones
+- Las notificaciones (toasts) ahora se muestran: faltaba montar `<Toaster />` en el layout raíz.
+- Generar una variante ahora respeta las combinaciones excluidas agregadas después de cargar las variables (closure desactualizado en `useCallback`).
+- Corregidos los errores de tipos en los fixtures de tests.
+
 ## [Limpieza de Producción] - 2025-10-13
 
 ### ✨ Mejoras
