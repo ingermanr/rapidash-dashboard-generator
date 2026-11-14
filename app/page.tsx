@@ -4,6 +4,7 @@ import { useCallback } from "react"
 import { BuilderView } from "@/components/generator/builder-view"
 import { LandingView } from "@/components/generator/landing-view"
 import { VariantDetailView } from "@/components/generator/variant-detail-view"
+import { StorageStatusBanner } from "@/components/storage-status-banner"
 import { useDashboardInfo, useDashboardStore, useLayouts } from "@/store"
 
 export default function DashboardGenerator() {
@@ -27,6 +28,7 @@ export default function DashboardGenerator() {
   if (showLanding) {
     return (
       <main>
+        <StorageStatusBanner />
         <LandingView
           onStart={startNewDashboard}
           savedDashboards={savedDashboards}
@@ -41,6 +43,7 @@ export default function DashboardGenerator() {
   if (selectedVariant) {
     return (
       <main>
+        <StorageStatusBanner />
         <VariantDetailView
           variant={selectedVariant}
           title={dashboardTitle}
@@ -55,6 +58,7 @@ export default function DashboardGenerator() {
 
   return (
     <main>
+      <StorageStatusBanner />
       <BuilderView onStartOver={startNewDashboard} onShowDashboards={handleShowDashboards} />
     </main>
   )
