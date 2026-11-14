@@ -18,7 +18,7 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T4 (S1) ESLint flat config, zero warnings, remove debug `console.*` — inline — 0dcd4ec
 - [x] T5 (S1) GitHub Actions CI — inline — 94920cd
 - [x] T6a (S2) Extract variant generation from `app/page.tsx` to `lib/domain/variant-generator.ts` with injected `random`/`now` + seeded RNG + tests — inline
-- [ ] T6b (S2) Extract mock data generation from `components/dashboard-detailed-preview.tsx` to `lib/domain/` with injected RNG + tests — inline
+- [x] T6b (S2) Extract mock data generation from `components/dashboard-detailed-preview.tsx` to `lib/domain/` with injected RNG + tests — inline
 - [ ] T7 (S3) UI split + behavior tests
 - [ ] T8 (S4) Product improvements (pending definition)
 
@@ -36,3 +36,4 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L8 Review of 0dcd4ec..HEAD approved and acknowledged. Fixed its notes: regression test for the exclusion fix (RED without fix, GREEN with it, 8/8 stable runs); `ActionType` as a type; PDF-only distribution renamed `getPdfLayoutDivisions`; actions pinned to SHAs (checkout v7.0.1, setup-node v7.1.0); `cancel-in-progress` only for PRs. `npm run verify`: 29/29 tests.
 - L9 (2026-11-13) CI blocked: "The job was not started because your account is locked due to a billing issue." User: "no voy a pagar, solo hagamos el commit, push y merge" → PR #1 merged (3eff0cc). User: "borra el ci" → workflow removed; `npm run verify` is the local gate.
 - L10 (2026-11-13) User: "adelante" (phase 2). T6a: logic moved verbatim except `Math.random()`→`random()` (15) and `Date.now()`→`now()` (7). Differential check vs main: identical variants for 5 variable sets × 30 seeds. Found dead branch in `getSuitableLayouts` (7-9 range shadowed by 7-8 and 9-10).
+- L11 T6b: sample data moved to `lib/domain/sample-data.ts`; components seed it with `randomFor(combination.id)`. Fixes: values re-randomized on every render (UI test RED on old component, GREEN now); "trimestre" matched "mes" (now quarters first). Differential check vs main: 1400 identical cases (names without "trimestre").

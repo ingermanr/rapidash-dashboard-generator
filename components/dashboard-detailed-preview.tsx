@@ -22,6 +22,17 @@ import { getRealLayoutDivisions, generateGridStyles, getGridDimensions, getCompo
 import { useState, useEffect } from "react"
 import { useDashboardInfo } from "@/store"
 import {
+  generateBarData,
+  generateCategoriesForVariable,
+  generateLineData,
+  generateMetricForVariable,
+  generateMetricValue,
+  generatePieData,
+  generateProgressValue,
+  generateRadialData,
+  randomFor,
+} from "@/lib/domain/sample-data"
+import {
   BarChart as RechartsBarChart,
   Bar,
   LineChart as RechartsLineChart,
@@ -1188,7 +1199,7 @@ function FilterCard({
 }
 
 function IndependentVariableCard({ variable, color }: { variable: Variable; color: string }) {
-  const metric = generateMetricForVariable(variable)
+  const metric = generateMetricForVariable(variable, randomFor(variable.id))
   const Icon = getIconForVariableType(variable.type)
 
   return (
@@ -1231,167 +1242,6 @@ function IndependentVariableCard({ variable, color }: { variable: Variable; colo
       </div>
     </Card>
   )
-}
-
-function generateMetricForVariable(variable: Variable): {
-  value: string
-  label: string
-  subtitle?: string
-} {
-  switch (variable.type) {
-    case "numeric": {
-      // Generate simulated dataset
-      const dataset = Array.from({ length: 20 }, () => Math.floor(Math.random() * 10000) + 1000)
-
-      // Calculate different aggregations
-      const aggregations = [
-        {
-          label: "Total",
-          value: dataset.reduce((a, b) => a + b, 0).toLocaleString(),
-          subtitle: `Suma de ${dataset.length} registros`,
-        },
-        {
-          label: "Promedio",
-          value: Math.floor(dataset.reduce((a, b) => a + b, 0) / dataset.length).toLocaleString(),
-          subtitle: `Media de ${dataset.length} registros`,
-        },
-        {
-          label: "Mediana",
-          value: calculateMedian(dataset).toLocaleString(),
-          subtitle: `Valor central de ${dataset.length} registros`,
-        },
-        {
-          label: "Desv. Estándar",
-          value: calculateStdDev(dataset).toLocaleString(),
-          subtitle: `Variabilidad de los datos`,
-        },
-      ]
-
-      // Randomly select one aggregation type
-      return aggregations[Math.floor(Math.random() * aggregations.length)]
-    }
-
-    case "categorical": {
-      // Generate simulated data for categories
-      const categories = generateCategoriesForVariable(variable)
-      const categoryData = categories.map((cat) => ({
-        name: cat,
-        value: Math.floor(Math.random() * 50000) + 10000,
-      }))
-
-      // Find top category
-      const topCategory = categoryData.reduce((max, current) => (current.value > max.value ? current : max))
-
-      return {
-        label: "Categoría Principal",
-        value: topCategory.name,
-        subtitle: `$${topCategory.value.toLocaleString()} en ventas`,
-      }
-    }
-
-    case "percentage-progress": {
-      const value = Math.floor(Math.random() * 40) + 50
-      return {
-        label: "Progreso",
-        value: `${value}%`,
-        subtitle: "Completado",
-      }
-    }
-
-    case "percentage-ratio": {
-      const value = Math.floor(Math.random() * 30) + 10
-      return {
-        label: "Proporción",
-        value: `${value}%`,
-        subtitle: "Del total",
-      }
-    }
-
-    case "temporal": {
-      return {
-        label: "Período",
-        value: new Date().toLocaleDateString("es-ES", { month: "short", year: "numeric" }),
-        subtitle: "Último actualizado",
-      }
-    }
-
-    case "text": {
-      return {
-        label: "Estado",
-        value: "Activo",
-        subtitle: "Sistema operativo",
-      }
-    }
-
-    case "binary": {
-      const value = Math.random() < 0.7 // Simulate a 70% chance of being true
-      return {
-        label: "Estado",
-        value: value ? "Sí" : "No",
-        subtitle: "Valor binario",
-      }
-    }
-
-    default:
-      return {
-        label: "Valor",
-        value: "N/A",
-      }
-  }
-}
-
-function calculateMedian(values: number[]): number {
-  const sorted = [...values].sort((a, b) => a - b)
-  const mid = Math.floor(sorted.length / 2)
-  return sorted.length % 2 === 0 ? Math.floor((sorted[mid - 1] + sorted[mid]) / 2) : sorted[mid]
-}
-
-function calculateStdDev(values: number[]): number {
-  const mean = values.reduce((a, b) => a + b, 0) / values.length
-  const squaredDiffs = values.map((value) => Math.pow(value - mean, 2))
-  const variance = squaredDiffs.reduce((a, b) => a + b, 0) / values.length
-  return Math.floor(Math.sqrt(variance))
-}
-
-function generateCategoriesForVariable(variable: Variable): string[] {
-  const name = variable.name.toLowerCase()
-
-  if (variable.type === "binary") {
-    if (name.includes("activo") || name.includes("active")) {
-      return ["Activo", "Inactivo"]
-    }
-    if (name.includes("estado") || name.includes("status")) {
-      return ["Sí", "No"]
-    }
-    if (name.includes("aprobado") || name.includes("approved")) {
-      return ["Aprobado", "Rechazado"]
-    }
-    if (name.includes("completado") || name.includes("completed")) {
-      return ["Completado", "Pendiente"]
-    }
-    return ["Sí", "No"]
-  }
-
-  if (name.includes("categoria") || name.includes("category")) {
-    return ["Electrónica", "Ropa", "Alimentos", "Hogar", "Deportes"]
-  }
-  if (name.includes("region") || name.includes("zona")) {
-    return ["Norte", "Sur", "Este", "Oeste", "Centro"]
-  }
-  if (name.includes("producto") || name.includes("product")) {
-    return ["Prod A", "Prod B", "Prod C", "Prod D", "Prod E"]
-  }
-  if (name.includes("tipo") || name.includes("type")) {
-    return ["Tipo Premium", "Tipo Estándar", "Tipo Básico", "Tipo Especial"]
-  }
-  if (name.includes("canal") || name.includes("channel")) {
-    return ["Online", "Tienda", "Móvil", "Tel", "Email"]
-  }
-  if (name.includes("cliente") || name.includes("customer")) {
-    return ["Corp", "PYME", "Indiv", "Gob"]
-  }
-
-  return ["Cat A", "Cat B", "Cat C", "Cat D", "Cat E"]
 }
 
 function getIconForVariableType(type: Variable["type"]) {
@@ -1489,8 +1339,8 @@ function CombinationCard({ combination, palette, index, size }: CombinationCardP
             {combination.chartType === "radial" && (
               <RadialChart colors={palette.colors} combination={combination} size={size} />
             )}
-            {combination.chartType === "progress" && <ProgressBar color={color} size={size} />}
-            {combination.chartType === "metric" && <MetricDisplay color={color} name={combination.name} size={size} />}
+            {combination.chartType === "progress" && <ProgressBar color={color} size={size} seedKey={combination.id} />}
+            {combination.chartType === "metric" && <MetricDisplay color={color} name={combination.name} size={size} seedKey={combination.id} />}
           </div>
         </div>
 
@@ -1533,7 +1383,7 @@ function BarChart({
   combination,
   size,
 }: { color: string; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generateBarData(combination)
+  const data = generateBarData(combination, randomFor(combination.id))
   const fontSize = size === "large" ? 13 : size === "medium" ? 11 : 9
   const barSize = size === "large" ? undefined : size === "medium" ? 25 : 18
   const margin =
@@ -1586,7 +1436,7 @@ function LineChart({
   combination,
   size,
 }: { color: string; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generateLineData(combination)
+  const data = generateLineData(combination, randomFor(combination.id))
   const fontSize = size === "large" ? 13 : size === "medium" ? 11 : 9
   const strokeWidth = size === "large" ? 3 : 2
   const margin =
@@ -1645,7 +1495,7 @@ function AreaChart({
   combination,
   size,
 }: { color: string; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generateLineData(combination)
+  const data = generateLineData(combination, randomFor(combination.id))
   const fontSize = size === "large" ? 13 : size === "medium" ? 11 : 9
   const strokeWidth = size === "large" ? 3 : 2
   const margin =
@@ -1698,7 +1548,7 @@ function PieChart({
   combination,
   size,
 }: { colors: string[]; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generatePieData(combination)
+  const data = generatePieData(combination, randomFor(combination.id))
   // Radius adaptativo basado en porcentaje del contenedor disponible
   const outerRadius = size === "large" ? "80%" : size === "medium" ? "70%" : "60%"
   const fontSize = size === "large" ? 12 : size === "medium" ? 11 : 10
@@ -1746,7 +1596,7 @@ function DonutChart({
   combination,
   size,
 }: { colors: string[]; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generatePieData(combination)
+  const data = generatePieData(combination, randomFor(combination.id))
   // Radios adaptativos basados en porcentaje del contenedor disponible
   const innerRadius = size === "large" ? "40%" : size === "medium" ? "35%" : "30%"
   const outerRadius = size === "large" ? "80%" : size === "medium" ? "70%" : "60%"
@@ -1791,84 +1641,8 @@ function DonutChart({
   )
 }
 
-function generateBarData(combination: VariableCombination) {
-  const categories = getCategoriesFromCombination(combination)
-  return categories.map((cat) => ({
-    name: cat,
-    value: Math.floor(Math.random() * 5000) + 1000,
-  }))
-}
-
-function generateLineData(combination: VariableCombination) {
-  const timePoints = getTimePointsFromCombination(combination)
-  return timePoints.map((point) => ({
-    name: point,
-    value: Math.floor(Math.random() * 5000) + 1000,
-  }))
-}
-
-function generatePieData(combination: VariableCombination) {
-  const categories = getCategoriesFromCombination(combination)
-  return categories.map((cat) => ({
-    name: cat,
-    value: Math.floor(Math.random() * 100) + 20,
-  }))
-}
-
-function getCategoriesFromCombination(combination: VariableCombination): string[] {
-  // Extract categorical variable from combination
-  const categoricalVar = combination.categoricalVariable
-
-  if (categoricalVar) {
-    return generateCategoriesForVariable(categoricalVar)
-  }
-
-  return ["Cat A", "Cat B", "Cat C", "Cat D", "Cat E"]
-}
-
-function getTimePointsFromCombination(combination: VariableCombination): string[] {
-  // Check if any variable name suggests temporal data
-  const numericName = combination.numericVariable.name.toLowerCase()
-  const categoricalName = combination.categoricalVariable?.name.toLowerCase() || ""
-
-  if (
-    numericName.includes("mes") ||
-    numericName.includes("month") ||
-    categoricalName.includes("mes") ||
-    categoricalName.includes("month")
-  ) {
-    return ["Ene", "Feb", "Mar", "Abr", "May", "Jun"]
-  }
-  if (
-    numericName.includes("trimestre") ||
-    numericName.includes("quarter") ||
-    categoricalName.includes("trimestre") ||
-    categoricalName.includes("quarter")
-  ) {
-    return ["Q1", "Q2", "Q3", "Q4"]
-  }
-  if (
-    numericName.includes("año") ||
-    numericName.includes("year") ||
-    categoricalName.includes("año") ||
-    categoricalName.includes("year")
-  ) {
-    return ["2020", "2021", "2022", "2023", "2024"]
-  }
-  if (
-    numericName.includes("dia") ||
-    numericName.includes("day") ||
-    categoricalName.includes("dia") ||
-    categoricalName.includes("day")
-  ) {
-    return ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
-  }
-
-  return ["Ene", "Feb", "Mar", "Abr", "May", "Jun"]
-}
-
-function ProgressBar({ color, size }: { color: string; size: "small" | "medium" | "large" }) {
-  const value = Math.floor(Math.random() * 40) + 50 // 50-90%
+function ProgressBar({ color, size, seedKey }: { color: string; size: "small" | "medium" | "large"; seedKey: string }) {
+  const value = generateProgressValue(randomFor(seedKey))
   const textSize = size === "large" ? "text-5xl" : size === "medium" ? "text-4xl" : "text-3xl"
   const gapSize = size === "large" ? "gap-6" : size === "medium" ? "gap-4" : "gap-3"
   const padding = size === "large" ? "px-8" : size === "medium" ? "px-6" : "px-4"
@@ -1901,9 +1675,8 @@ function ProgressBar({ color, size }: { color: string; size: "small" | "medium" 
   )
 }
 
-function MetricDisplay({ color, name, size }: { color: string; name: string; size: "small" | "medium" | "large" }) {
-  const value = Math.floor(Math.random() * 100000) + 10000
-  const change = (Math.random() * 30 - 10).toFixed(1)
+function MetricDisplay({ color, name, size, seedKey }: { color: string; name: string; size: "small" | "medium" | "large"; seedKey: string }) {
+  const { value, change } = generateMetricValue(randomFor(seedKey))
   const isPositive = Number.parseFloat(change) > 0
   
   const textSize = size === "large" ? "text-4xl" : size === "medium" ? "text-3xl" : "text-2xl"
@@ -1938,7 +1711,7 @@ function HorizontalBarChart({
   combination,
   size,
 }: { color: string; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generateBarData(combination)
+  const data = generateBarData(combination, randomFor(combination.id))
   const fontSize = size === "large" ? 13 : size === "medium" ? 12 : 10
   const barSize = size === "large" ? undefined : size === "medium" ? 25 : 18
   const margin =
@@ -1994,7 +1767,7 @@ function RadialChart({
   combination,
   size,
 }: { colors: string[]; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generateRadialData(combination, colors)
+  const data = generateRadialData(combination, colors, randomFor(combination.id))
   const fontSize = size === "large" ? 12 : size === "medium" ? 11 : 10
 
   return (
@@ -2034,13 +1807,4 @@ function RadialChart({
       </RadialBarChart>
     </ResponsiveContainer>
   )
-}
-
-function generateRadialData(combination: VariableCombination, colors: string[]) {
-  const categories = getCategoriesFromCombination(combination)
-  return categories.slice(0, 5).map((cat, index) => ({
-    name: cat,
-    value: Math.floor(Math.random() * 80) + 20,
-    fill: colors[index % colors.length],
-  }))
 }
