@@ -71,7 +71,7 @@ export function BuilderView({ onStartOver }: BuilderViewProps) {
             <div className="space-y-6">
               <div className="inline-flex items-center gap-3 rounded-full border-2 border-primary/30 bg-gradient-to-r from-primary/15 to-chart-2/10 px-6 py-3 text-sm font-bold text-primary backdrop-blur-md shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30">
                 <Sparkles className="h-5 w-5 animate-soft-pulse" />
-                AI-Powered Dashboard Design
+                Diseño Automático de Dashboards
               </div>
               <div>
                 <h1 className="mb-4 text-balance text-4xl font-black tracking-tight text-foreground sm:text-5xl">
@@ -80,7 +80,7 @@ export function BuilderView({ onStartOver }: BuilderViewProps) {
                 <p className="max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground">
                   Transforma tus datos en{" "}
                   <span className="font-semibold text-primary">visualizaciones profesionales</span>.{" "}
-                  Define variables, genera layouts optimizados y obtén esquemas de color diseñados por IA.
+                  Define variables, genera layouts optimizados y obtén paletas de color de alto contraste.
                 </p>
               </div>
             </div>
@@ -300,9 +300,9 @@ export function BuilderView({ onStartOver }: BuilderViewProps) {
                 </div>
               </div>
               <p className="leading-relaxed text-muted-foreground">
-                Perfecto! Tienes todas las variables necesarias. Haz clic en{" "}
+                ¡Perfecto! Tienes todas las variables necesarias. Haz clic en{" "}
                 <span className="font-semibold text-primary">&ldquo;Generar Layout&rdquo;</span>{" "}
-                para crear un dashboard optimizado con visualizaciones profesionales y paletas de colores diseñadas por IA.
+                para crear un dashboard optimizado con visualizaciones profesionales y paletas de colores de alto contraste.
               </p>
             </div>
           </div>
