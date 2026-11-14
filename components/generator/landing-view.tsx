@@ -145,7 +145,7 @@ export function LandingView({ onStart }: LandingViewProps) {
 
               <div className="relative group text-center lg:text-left">
                 <div className="mb-8 flex justify-center lg:justify-start">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-chart-2 to-chart-2/80 text-3xl font-bold text-white shadow-2xl shadow-chart-2/30 transition-all group-hover:scale-110 group-hover:shadow-chart-2/40">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-chart-2 to-chart-2/80 text-3xl font-bold text-primary-foreground shadow-2xl shadow-chart-2/30 transition-all group-hover:scale-110 group-hover:shadow-chart-2/40">
                     2
                   </div>
                 </div>
@@ -158,7 +158,7 @@ export function LandingView({ onStart }: LandingViewProps) {
 
               <div className="relative group text-center lg:text-left">
                 <div className="mb-8 flex justify-center lg:justify-start">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-chart-3 to-chart-3/80 text-3xl font-bold text-white shadow-2xl shadow-chart-3/30 transition-all group-hover:scale-110 group-hover:shadow-chart-3/40">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-chart-3 to-chart-3/80 text-3xl font-bold text-primary-foreground shadow-2xl shadow-chart-3/30 transition-all group-hover:scale-110 group-hover:shadow-chart-3/40">
                     3
                   </div>
                 </div>

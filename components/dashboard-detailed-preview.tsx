@@ -102,7 +102,7 @@ export function DashboardDetailedPreview({
                       <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs px-2 py-0.5">
                         {variant.layout}
                       </Badge>
-                      <Badge variant="outline" className="bg-accent/10 text-accent-foreground border-accent/20 text-xs px-2 py-0.5">
+                      <Badge variant="outline" className="bg-accent/10 text-foreground border-accent/20 text-xs px-2 py-0.5">
                         {variant.palette.name}
                       </Badge>
                     </div>
@@ -241,8 +241,8 @@ export function DashboardDetailedPreview({
                     <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-background/60 border border-border/30">
                       <span className="text-muted-foreground">Uso:</span>
                       <span className={`font-medium ${
-                        quality.spaceUtilization >= 70 ? 'text-green-600' : 
-                        quality.spaceUtilization >= 50 ? 'text-orange-600' : 'text-red-600'
+                        quality.spaceUtilization >= 70 ? 'text-green-700 dark:text-green-400' : 
+                        quality.spaceUtilization >= 50 ? 'text-orange-700 dark:text-orange-400' : 'text-red-700 dark:text-red-400'
                       }`}>
                         {quality.spaceUtilization}%
                       </span>

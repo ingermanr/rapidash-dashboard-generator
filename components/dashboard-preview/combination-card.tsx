@@ -64,9 +64,9 @@ export function CombinationCard({ combination, palette, index, size }: Combinati
           <Badge 
             variant="secondary" 
             className="text-xs font-medium rounded-lg border-0 text-foreground/80"
-            style={{ 
-              backgroundColor: `${color}10`,
-              color: color
+            style={{
+              backgroundColor: `${color}1a`,
+              boxShadow: `inset 0 0 0 1px ${color}40`,
             }}
           >
             {CHART_TYPE_LABELS[combination.chartType]}

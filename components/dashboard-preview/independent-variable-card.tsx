@@ -26,11 +26,9 @@ export function IndependentVariableCard({ variable, color }: { variable: Variabl
         </div>
         
         <div className="space-y-0.5">
-          <div 
-            className="text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-            style={{ 
-              backgroundImage: `linear-gradient(135deg, ${color}, ${color}80)`
-            }}
+          <div
+            className="border-l-4 pl-2 text-xl font-bold text-foreground"
+            style={{ borderColor: color }}
           >
             {metric.value}
           </div>
