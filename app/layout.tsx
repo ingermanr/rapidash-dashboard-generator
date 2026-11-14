@@ -7,9 +7,9 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Rapidash - Dashboard Generator',
-  description: 'Generador inteligente de dashboards profesionales con IA. Crea layouts optimizados y exporta especificaciones completas en PDF.',
+  description: 'Generador de dashboards profesionales: crea layouts optimizados a partir de tus variables y exporta especificaciones completas en PDF.',
   generator: 'Rapidash',
-  keywords: ['dashboard', 'generator', 'IA', 'visualización', 'datos', 'charts', 'PDF'],
+  keywords: ['dashboard', 'generator', 'layouts', 'visualización', 'datos', 'charts', 'PDF'],
   authors: [{ name: 'Rapidash Team' }],
   creator: 'Rapidash',
   publisher: 'Rapidash',

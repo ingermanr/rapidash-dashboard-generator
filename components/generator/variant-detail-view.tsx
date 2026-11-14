@@ -12,10 +12,11 @@ export interface VariantDetailViewProps {
   description: string
   onBack: () => void
   onStartOver: () => void
+  onRegeneratePalette?: () => void
 }
 
 /** Full-page detail of one generated variant. */
-export function VariantDetailView({ variant, title, description, onBack, onStartOver }: VariantDetailViewProps) {
+export function VariantDetailView({ variant, title, description, onBack, onStartOver, onRegeneratePalette }: VariantDetailViewProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -37,6 +38,7 @@ export function VariantDetailView({ variant, title, description, onBack, onStart
           variant={variant}
           dashboardTitle={title}
           dashboardDescription={description}
+          onRegeneratePalette={onRegeneratePalette}
         />
       </div>
     </div>

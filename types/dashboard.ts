@@ -32,7 +32,10 @@ export interface VariableCombination {
 
 export interface ColorPalette {
   name: string
+  /** Colours for light surfaces, in validated slot order. */
   colors: string[]
+  /** Same hues stepped for dark surfaces. Optional so variants saved before it was added still load. */
+  darkColors?: string[]
   description: string
 }
 

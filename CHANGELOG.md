@@ -21,7 +21,17 @@
 - `app/page.tsx` quedó en 51 líneas: elige entre `LandingView`, `BuilderView` y `VariantDetailView` (`components/generator/`).
 - La vista detallada pasó de un archivo de 2841 líneas a un contenedor de 234 líneas más componentes en `components/dashboard-preview/` (un archivo por gráfico) y la exportación a PDF en `lib/pdf/`.
 
+### Paletas de color
+- 11 paletas nuevas que reemplazan las 56 anteriores (solo 8 de ellas pasaban las validaciones de color). Cada una tiene su versión para modo claro y para modo oscuro, y se validaron contra las superficies reales de las tarjetas: banda de luminosidad, saturación mínima, separación para daltonismo (ΔE ≥ 8), separación con visión normal (ΔE ≥ 15) y contraste de 3:1.
+- Botón "Otra paleta" en cada variante y en la vista detallada: cambia solo los colores y mantiene la distribución y las visualizaciones.
+- Las muestras de color son botones accesibles con teclado; muestran el código hex al pasar el cursor o al enfocarlas, y lo copian al hacer clic.
+
 ### Correcciones
+- Las tarjetas de la vista previa ocupan toda su celda del grid (antes tenían altura fija y dejaban huecos en celdas de varias filas), los tipos de gráfico se muestran en español y las secciones de filtros y métricas usan todo el ancho disponible.
+- Los layouts llenan todo el espacio del dashboard: antes solo 51 de 169 combinaciones de layout y cantidad de visualizaciones lo hacían ("Grid" con una sola visualización usaba el 33%). Las filas incompletas se reparten en partes iguales.
+- Los filtros de la vista detallada ahora afectan a los gráficos: los números de ejemplo cambian según el filtro, los gráficos por la variable filtrada muestran solo la categoría elegida y el filtro de período cambia los puntos de tiempo. Elegir "Todas" ya no cuenta como filtro activo, y se quitó la opción "Personalizado", que no hacía nada.
+- El diagrama del PDF usa el mismo motor de layouts que la vista previa: antes usaba una distribución fija que podía no coincidir y, con más de 12 visualizaciones, dibujaba varias una encima de otra.
+- Se quitaron las menciones a IA: la generación es automática y basada en reglas.
 - Los datos de ejemplo de cada gráfico ya no cambian en cada re-render (por ejemplo al usar filtros o cambiar el tema): se generan con una semilla derivada del id de la combinación.
 - Los errores al generar el PDF se muestran con una notificación en lugar de un `alert()` que bloqueaba la página.
 - Las variables con "trimestre" en el nombre muestran trimestres (Q1-Q4) en lugar de meses.

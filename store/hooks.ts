@@ -78,6 +78,7 @@ export const useLayouts = () => {
   const setCurrentVariant = useDashboardStore((state) => state.setCurrentVariant)
   const addToHistory = useDashboardStore((state) => state.addToHistory)
   const removeFromHistory = useDashboardStore((state) => state.removeFromHistory)
+  const regenerateVariantPalette = useDashboardStore((state) => state.regenerateVariantPalette)
   const setSelectedVariant = useDashboardStore((state) => state.setSelectedVariant)
   const setIsGenerating = useDashboardStore((state) => state.setIsGenerating)
   const clearHistory = useDashboardStore((state) => state.clearHistory)
@@ -100,6 +101,7 @@ export const useLayouts = () => {
     setCurrentVariant,
     addToHistory,
     removeFromHistory,
+    regenerateVariantPalette,
     setSelectedVariant,
     setIsGenerating,
     clearHistory,

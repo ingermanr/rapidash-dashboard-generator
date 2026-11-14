@@ -41,7 +41,7 @@ export function LandingView({ onStart }: LandingViewProps) {
           <div className="mb-20 text-center">
             <div className="mb-8 inline-flex items-center gap-3 rounded-full border-2 border-primary/30 bg-gradient-to-r from-primary/15 to-accent/10 px-8 py-3 text-sm font-bold text-primary backdrop-blur-md shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30 dark:border-primary/20 dark:from-primary/10 dark:to-accent/5 glass-effect animate-scale-in">
               <Sparkles className="h-5 w-5 animate-soft-pulse" />
-              Powered by AI
+              Generación Automática
             </div>
             <h1 className="mb-8 text-balance text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
               <span className="hero-title-gradient" data-text="Dashboard">
@@ -52,7 +52,7 @@ export function LandingView({ onStart }: LandingViewProps) {
             <p className="mx-auto mb-12 max-w-4xl text-pretty text-xl leading-relaxed text-muted-foreground sm:text-2xl">
               Transforma tus datos en{" "}
               <span className="font-semibold text-primary">visualizaciones profesionales</span>{" "}
-              con inteligencia artificial. Define variables, genera layouts optimizados y obtén esquemas de color 
+              en minutos. Define variables, genera layouts optimizados y obtén esquemas de color 
               diseñados automáticamente.
             </p>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -149,7 +149,7 @@ export function LandingView({ onStart }: LandingViewProps) {
                 </div>
                 <h3 className="mb-4 text-2xl font-bold text-foreground">Genera Layouts</h3>
                 <p className="leading-relaxed text-muted-foreground">
-                  La IA analiza tus variables y genera <span className="font-semibold text-chart-2">layouts optimizados</span> con 
+                  El generador analiza el tipo y la prioridad de tus variables y crea <span className="font-semibold text-chart-2">layouts optimizados</span> con 
                   combinaciones inteligentes de gráficos y paletas de colores profesionales adaptadas a tus datos.
                 </p>
               </div>

@@ -1,7 +1,7 @@
 {
   "name": "Rapidash - Dashboard Generator",
   "short_name": "Rapidash",
-  "description": "Generador inteligente de dashboards profesionales con IA",
+  "description": "Generador de dashboards profesionales con layouts optimizados y exportación a PDF",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

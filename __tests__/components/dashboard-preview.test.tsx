@@ -98,6 +98,31 @@ describe('DashboardDetailedPreview', () => {
     expect(screen.queryByRole('button', { name: /Limpiar/ })).not.toBeInTheDocument()
   })
 
+  it('does not count "Todas las categorías" as an active filter', async () => {
+    render(<DashboardDetailedPreview variant={variant([combination({})])} />)
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(within(screen.getByRole('listbox')).getByRole('option', { name: 'Sur' }))
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(within(screen.getByRole('listbox')).getByRole('option', { name: 'Todas las categorías' }))
+
+    expect(screen.queryByRole('button', { name: /Limpiar/ })).not.toBeInTheDocument()
+  })
+
+  it('updates the sample numbers when a filter is applied and restores them when cleared', async () => {
+    render(<DashboardDetailedPreview variant={variant([combination({ id: 'kpi', name: 'Ingresos totales' })])} />)
+    const chartCard = () => screen.getByRole('heading', { name: 'Ingresos totales' }).closest('[data-slot="card"]')?.textContent
+    const unfiltered = chartCard()
+    expect(unfiltered).toMatch(/\d/)
+
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(within(screen.getByRole('listbox')).getByRole('option', { name: 'Norte' }))
+    expect(chartCard()).not.toBe(unfiltered)
+
+    await userEvent.click(screen.getByRole('button', { name: /Limpiar/ }))
+    expect(chartCard()).toBe(unfiltered)
+  })
+
   it('reports PDF failures with a toast instead of a blocking alert', async () => {
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {})
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})

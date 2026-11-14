@@ -1,10 +1,13 @@
 import { getIconForVariableType } from "@/components/dashboard-preview/variable-icon"
 import { Card } from "@/components/ui/card"
-import { generateMetricForVariable, randomFor } from "@/lib/domain/sample-data"
+import { generateMetricForVariable } from "@/lib/domain/sample-data"
 import type { Variable } from "@/types/dashboard"
+import { usePreviewFilters } from "@/components/dashboard-preview/preview-filters"
+import { chartRandom } from "@/lib/domain/filters"
 
 export function IndependentVariableCard({ variable, color }: { variable: Variable; color: string }) {
-  const metric = generateMetricForVariable(variable, randomFor(variable.id))
+  const filters = usePreviewFilters()
+  const metric = generateMetricForVariable(variable, chartRandom(variable.id, filters))
   const Icon = getIconForVariableType(variable.type)
 
   return (

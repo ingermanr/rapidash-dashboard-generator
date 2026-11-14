@@ -1,5 +1,5 @@
 import { CombinationCard } from "@/components/dashboard-preview/combination-card"
-import { analyzeLayoutQuality, generateGridStyles, getComponentSize, getGridDimensions, getRealLayoutDivisions } from "@/lib/layout-engine"
+import { generateGridStyles, getComponentSize, getGridDimensions, getRealLayoutDivisions } from "@/lib/layout-engine"
 import type { LayoutVariant } from "@/types/dashboard"
 
 /** Renders a layout variant on the 12-column grid computed by the layout engine. */
@@ -15,21 +15,6 @@ export function DashboardGrid({ variant }: { variant: LayoutVariant }) {
     const { maxRows, maxColumns } = getGridDimensions(divisions)
     
     // Debug info en desarrollo con validación de calidad
-    if (process.env.NODE_ENV === 'development') {
-      const quality = analyzeLayoutQuality(divisions)
-      
-      // Advertencias si hay problemas
-      if (quality.spaceUtilization < 50) {
-        console.warn(`⚠️ Bajo aprovechamiento de espacio: ${quality.spaceUtilization}%`)
-      }
-      if (quality.hasOverlaps) {
-        console.warn(`❌ Solapamientos detectados en el layout`)
-      }
-      if (!quality.isValid) {
-        console.error(`💥 Layout inválido detectado`)
-      }
-    }
-    
     return (
       <div 
         className="relative w-full" 
@@ -62,7 +47,7 @@ export function DashboardGrid({ variant }: { variant: LayoutVariant }) {
             <div
               key={combination.id}
               style={gridStyles}
-              className="relative"
+              className="relative h-full"
             >
               <CombinationCard 
                 combination={combination} 

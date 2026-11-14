@@ -1,15 +1,18 @@
 "use client"
 
 import { Legend, RadialBar, RadialBarChart, ResponsiveContainer, Tooltip } from "recharts"
-import { generateRadialData, randomFor } from "@/lib/domain/sample-data"
+import { generateRadialData } from "@/lib/domain/sample-data"
 import type { VariableCombination } from "@/types/dashboard"
+import { usePreviewFilters } from "@/components/dashboard-preview/preview-filters"
+import { chartRandom, filterChartData } from "@/lib/domain/filters"
 
 export function RadialChart({
   colors,
   combination,
   size,
 }: { colors: string[]; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generateRadialData(combination, colors, randomFor(combination.id))
+  const filters = usePreviewFilters()
+  const data = filterChartData(generateRadialData(combination, colors, chartRandom(combination.id, filters)), combination, filters)
   const fontSize = size === "large" ? 12 : size === "medium" ? 11 : 10
 
   return (

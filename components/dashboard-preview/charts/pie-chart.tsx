@@ -1,15 +1,18 @@
 "use client"
 
 import { Cell, Legend, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip } from "recharts"
-import { generatePieData, randomFor } from "@/lib/domain/sample-data"
+import { generatePieData } from "@/lib/domain/sample-data"
 import type { VariableCombination } from "@/types/dashboard"
+import { usePreviewFilters } from "@/components/dashboard-preview/preview-filters"
+import { chartRandom, filterChartData } from "@/lib/domain/filters"
 
 export function PieChart({
   colors,
   combination,
   size,
 }: { colors: string[]; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generatePieData(combination, randomFor(combination.id))
+  const filters = usePreviewFilters()
+  const data = filterChartData(generatePieData(combination, chartRandom(combination.id, filters)), combination, filters)
   // Radius adaptativo basado en porcentaje del contenedor disponible
   const outerRadius = size === "large" ? "80%" : size === "medium" ? "70%" : "60%"
   const fontSize = size === "large" ? 12 : size === "medium" ? 11 : 10

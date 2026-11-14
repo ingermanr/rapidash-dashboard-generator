@@ -21,7 +21,11 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T6b (S2) Extract mock data generation from `components/dashboard-detailed-preview.tsx` to `lib/domain/` with injected RNG + tests — inline
 - [x] T7a (S3) Split `dashboard-detailed-preview.tsx` (container + `components/dashboard-preview/*` + `lib/pdf/`) + behavior tests — inline
 - [x] T7b (S3) Split `app/page.tsx` views + behavior tests — inline
-- [ ] T8 (S4) Product improvements (pending definition)
+- [x] T8a (S4) Remove inaccurate AI claims — inline — 1a7eb43
+- [x] T8b (S4) Layouts fill the whole grid (`fillEmptySpace`) — inline
+- [x] T8c (S4) PDF diagram uses the layout engine — inline
+- [x] T8d (S4) Filters affect the preview charts — inline
+- [x] T8e (S4) Modern palettes, better color presentation, regenerate palette independently of the layout — inline
 
 Route evidence: phase 1 units are small and sequential; no writer trigger applies.
 
@@ -41,3 +45,10 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L12 (2026-11-13) User: "dale, pero recuerda que estamos mejorando la herramienta, si hay que mejorar lo que sea, lo mejoramos". The "dead branch" was a bug: LARGE range constants were 7-9 instead of 11-15 (RED 3 → GREEN). New engine coverage test (1-30 combinations, every suitable layout) found "Staggered" overlapping from 6+ cards (blocks span 2 rows but advanced 1); fixed. 109/109 tests.
 - L13 (2026-11-13) User: "dale" (phase 3). T7a: scripted split by verified line ranges; preview 1810 → 234 lines. Differential vs original: identical HTML (React ids normalized) and identical jsPDF call log for 60 variants, 16 layouts, 8 chart types, 42,923 calls. PDF errors now use a destructive toast instead of `alert()` (RED on old). Finding for phase 4: filters only change local state; no chart reads them.
 - L14 T7b: `app/page.tsx` 561 → 51 lines (router) + `components/generator/{landing,builder,variant-detail}-view.tsx`. Differential vs original page: identical HTML in 7 store states. Navigation tests added. Copy finding for phase 4: landing says "Powered by AI" and metadata says "con IA", but nothing uses AI.
+- L15 (2026-11-13) User: "dale" (push/merge phase 3, start phase 4). PR #4 merged (05aa280).
+- L16 (2026-11-13) User: "también veo que el generaador puede mejorar, ya que no genera combinaciones de cuadrantes que llenen todo el espacio disponible para el dashboard, revisa eso también". Measured: 51/169 layout×count pairs at 100% utilization (Grid min 33%). Added `fillEmptySpace` (balanced row bands + neighbour growth); now 169/169 at 100%, no overlaps, no new narrow or tall cards. Removed the generator fallback that swapped layouts below 60% utilization (unreachable now).
+- L17 T8c: PDF now uses `getRealLayoutDivisions`. Its hardcoded distribution was capped at 12 components and reused the last cell, overlapping boxes (RED with 13/15 components). Tests cover 5-30 components.
+- L18 (2026-11-13) User: "incluye también una revisión sobre las combinaciones de colores y como se muestran para que sean más modernos y se puedan volver a generar independietemente de la generación de la distribución de los cuadrantes"
+- L19 T8d: `lib/domain/filters.ts` + `PreviewFiltersProvider` context. Filters reseed sample data (unfiltered key unchanged, so unfiltered output is identical), narrow charts by the filtered dimension and set time points per period. Fixed "Todas" counting as active; removed no-op "Personalizado". Both UI tests RED on main components.
+- L20 T8e: old palettes: 8/56 passed the dataviz validator in light mode, none had dark variants. Searched orderings and Tailwind steps per theme with the validator (light band 0.43-0.77 vs #f8f8f8, dark band 0.48-0.67 vs #060606): 11 themes pass both modes with 0 warnings ("Tierra" had no passing order). `lib/domain/palettes.ts` (`pickPalette`, `regeneratePalette`, `paletteColors`), optional `ColorPalette.darkColors` (old saved variants still load), store `regenerateVariantPalette`, `PaletteSwatches` (keyboard-accessible buttons), "Otra paleta" buttons. 191/191 tests.
+- L21 Visual check with headless Chromium over CDP (browser extension unavailable): cards had fixed heights (h-64/80/96) so multi-row cells showed gaps despite 100% engine utilization; now `h-full min-h-[260px]`. Chart type badges in Spanish; filter/metric grids adapt columns to item count. Dark mode verified (no hang; the slow step was adding variables in dev mode).

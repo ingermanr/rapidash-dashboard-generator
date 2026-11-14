@@ -2,12 +2,12 @@
 
 import type React from "react"
 
-import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { PaletteSwatches } from "@/components/palette-swatches"
 import { useToast } from "@/hooks/use-toast"
-import { LayoutGrid, TrendingUp, Info, Eye, Check, X } from "lucide-react"
+import { LayoutGrid, TrendingUp, Info, Eye, Shuffle, X } from "lucide-react"
 import type { LayoutVariant } from "@/types/dashboard"
 import { getRealLayoutDivisions, generateGridStyles, getGridDimensions, analyzeLayoutQuality } from "@/lib/layout-engine"
 
@@ -16,31 +16,12 @@ interface LayoutPreviewProps {
   index: number
   onSelect: () => void
   onDelete: (variantId: string) => void
+  /** Swaps the palette while keeping the layout and combinations. */
+  onRegeneratePalette?: () => void
 }
 
-export function LayoutPreview({ variant, index, onSelect, onDelete }: LayoutPreviewProps) {
+export function LayoutPreview({ variant, index, onSelect, onDelete, onRegeneratePalette }: LayoutPreviewProps) {
   const { toast } = useToast()
-  const [copiedColor, setCopiedColor] = useState<string | null>(null)
-
-  const copyColorToClipboard = async (color: string) => {
-    try {
-      await navigator.clipboard.writeText(color)
-      setCopiedColor(color)
-      toast({
-        description: (
-          <div className="flex items-center gap-2">
-            <Check className="h-4 w-4" />
-            <span>Código copiado: {color}</span>
-          </div>
-        ),
-        duration: 2000,
-      })
-      setTimeout(() => setCopiedColor(null), 2000)
-    } catch (err) {
-      console.error("Failed to copy color:", err)
-    }
-  }
-
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
     onDelete(variant.id)
@@ -90,28 +71,23 @@ export function LayoutPreview({ variant, index, onSelect, onDelete }: LayoutPrev
           <div className="col-span-2 space-y-2">
             {/* Color Palette */}
             <div>
-              <h4 className="mb-1.5 text-xs font-medium text-card-foreground">{variant.palette.name}</h4>
-              <div className="mb-1.5 grid grid-cols-2 gap-1">
-                {variant.palette.colors.map((color, i) => (
-                  <div
-                    key={i}
-                    className="group/color relative h-5 cursor-pointer overflow-hidden rounded-sm border border-border shadow-sm transition-all hover:scale-105 hover:shadow-md"
-                    style={{ backgroundColor: color }}
-                    onClick={() => copyColorToClipboard(color)}
+              <div className="mb-1.5 flex items-center justify-between gap-1">
+                <h4 className="text-xs font-medium text-card-foreground">{variant.palette.name}</h4>
+                {onRegeneratePalette && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={onRegeneratePalette}
+                    className="h-6 gap-1 px-1.5 text-xs"
+                    title="Cambiar solo la paleta, manteniendo la distribución"
                   >
-                    {/* Overlay que solo aparece al hover directo sobre el color */}
-                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-sm bg-black/0 opacity-0 transition-all duration-200 group-hover/color:bg-black/70 group-hover/color:opacity-100">
-                      <span className="text-xs font-mono font-medium text-white">{color}</span>
-                    </div>
-                    {/* Indicador de copiado */}
-                    {copiedColor === color && (
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-sm bg-black/80">
-                        <Check className="h-3 w-3 text-white" />
-                      </div>
-                    )}
-                  </div>
-                ))}
+                    <Shuffle className="h-3 w-3" aria-hidden="true" />
+                    Otra paleta
+                  </Button>
+                )}
               </div>
+              <PaletteSwatches palette={variant.palette} className="mb-1.5" />
               <p className="text-pretty text-xs leading-tight text-muted-foreground">{variant.palette.description}</p>
             </div>
 

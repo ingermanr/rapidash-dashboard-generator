@@ -1,9 +1,12 @@
 "use client"
 
-import { generateProgressValue, randomFor } from "@/lib/domain/sample-data"
+import { generateProgressValue } from "@/lib/domain/sample-data"
+import { usePreviewFilters } from "@/components/dashboard-preview/preview-filters"
+import { chartRandom } from "@/lib/domain/filters"
 
 export function ProgressBar({ color, size, seedKey }: { color: string; size: "small" | "medium" | "large"; seedKey: string }) {
-  const value = generateProgressValue(randomFor(seedKey))
+  const filters = usePreviewFilters()
+  const value = generateProgressValue(chartRandom(seedKey, filters))
   const textSize = size === "large" ? "text-5xl" : size === "medium" ? "text-4xl" : "text-3xl"
   const gapSize = size === "large" ? "gap-6" : size === "medium" ? "gap-4" : "gap-3"
   const padding = size === "large" ? "px-8" : size === "medium" ? "px-6" : "px-4"

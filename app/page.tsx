@@ -8,7 +8,7 @@ import { useDashboardInfo, useLayouts, useVariables } from "@/store"
 
 export default function DashboardGenerator() {
   const { clearVariables } = useVariables()
-  const { selectedVariant, setSelectedVariant, clearHistory } = useLayouts()
+  const { selectedVariant, setSelectedVariant, clearHistory, regenerateVariantPalette } = useLayouts()
   const {
     dashboardTitle,
     dashboardDescription,
@@ -43,6 +43,7 @@ export default function DashboardGenerator() {
         description={dashboardDescription}
         onBack={handleBackToVariants}
         onStartOver={handleStartCreating}
+        onRegeneratePalette={() => regenerateVariantPalette(selectedVariant.id)}
       />
     )
   }
