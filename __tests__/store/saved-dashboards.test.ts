@@ -117,6 +117,48 @@ describe('saved dashboards', () => {
     expect(stored.state.activeDashboardId).toBe(store().activeDashboardId)
   })
 
+  it('keeps dashboards saved by another tab and re-saves the one open here', () => {
+    act(() => store().setDashboardTitle('Esta pestaña'))
+    const ownId = store().activeDashboardId!
+    const otherTab = {
+      id: 'other',
+      title: 'Otra pestaña',
+      description: '',
+      variables: [region],
+      excludedCombinations: [],
+      generationHistory: [],
+      createdAt: 1,
+      updatedAt: 2,
+    }
+    const newValue = JSON.stringify({
+      version: 1,
+      state: { dashboardTitle: 'Otra pestaña', savedDashboards: [otherTab], activeDashboardId: 'other' },
+    })
+
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'dashboard-storage', newValue, storageArea: localStorage }))
+    })
+
+    expect(store().dashboardTitle).toBe('Esta pestaña')
+    expect(store().activeDashboardId).toBe(ownId)
+    expect(store().savedDashboards.map((d) => d.title).sort()).toEqual(['Esta pestaña', 'Otra pestaña'])
+    const stored = JSON.parse(localStorage.getItem('dashboard-storage')!)
+    expect(stored.state.savedDashboards.map((d: { title: string }) => d.title).sort()).toEqual(['Esta pestaña', 'Otra pestaña'])
+  })
+
+  it('ignores storage events for other keys or with unreadable data', () => {
+    act(() => store().setDashboardTitle('Intacto'))
+    const before = store().savedDashboards
+
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'theme', newValue: 'dark', storageArea: localStorage }))
+      window.dispatchEvent(new StorageEvent('storage', { key: 'dashboard-storage', newValue: '{roto', storageArea: localStorage }))
+      window.dispatchEvent(new StorageEvent('storage', { key: 'dashboard-storage', newValue: null, storageArea: localStorage }))
+    })
+
+    expect(store().savedDashboards).toBe(before)
+  })
+
   it('migrates the single dashboard stored by the previous version on load', async () => {
     localStorage.setItem(
       'dashboard-storage',

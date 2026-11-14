@@ -267,3 +267,21 @@ useDashboardStore.subscribe((state, previous) => {
     useDashboardStore.setState({ savedDashboards: saved, activeDashboardId: activeId })
   }
 })
+
+// Another tab saved: adopt its list (it may hold dashboards created there) and keep this tab's open dashboard in it.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key !== 'dashboard-storage' || !event.newValue) return
+    let incoming: SavedDashboard[]
+    try {
+      const parsed = JSON.parse(event.newValue)
+      if (parsed?.version !== PERSISTED_STATE_VERSION || !Array.isArray(parsed.state?.savedDashboards)) return
+      incoming = parsed.state.savedDashboards
+    } catch {
+      return
+    }
+    const state = useDashboardStore.getState()
+    const { saved, activeId } = upsertSavedDashboard(incoming, state.activeDashboardId, workspaceOf(state))
+    useDashboardStore.setState({ savedDashboards: saved, activeDashboardId: activeId })
+  })
+}
