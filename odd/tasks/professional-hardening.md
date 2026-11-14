@@ -27,7 +27,7 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T8c (S4) PDF diagram uses the layout engine — inline
 - [x] T8d (S4) Filters affect the preview charts — inline
 - [x] T8e (S4) Modern palettes, better color presentation, regenerate palette independently of the layout — inline
-- [x] T9 (S5) Accessibility pass — inline (one understood change per slice; no writer trigger) — c573883 (semantics), next commit (contrast)
+- [x] T9 (S5) Accessibility pass — inline (one understood change per slice; no writer trigger) — c573883 (semantics), cca5091 (contrast)
 
 Route evidence: phase 1 units are small and sequential; no writer trigger applies.
 
