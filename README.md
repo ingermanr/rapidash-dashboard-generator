@@ -97,11 +97,11 @@ npm ci
 | `npm test` | Tests con Jest |
 | `npm run test:watch` | Tests en modo watch |
 | `npm run test:coverage` | Reporte de cobertura |
-| `npm run verify` | Typecheck + lint + tests + build (lo mismo que corre el CI) |
+| `npm run verify` | Typecheck + lint + tests + build |
 
-### Integración Continua
+### Antes de cada PR
 
-GitHub Actions (`.github/workflows/ci.yml`) ejecuta typecheck, lint, tests y build en cada push a `main` y en cada pull request.
+No hay CI remoto: ejecuta `npm run verify` y asegúrate de que pase antes de abrir o mergear un PR.
 
 ---
 
