@@ -372,10 +372,11 @@ export function getRealLayoutDivisions(layout: string, combinationsCount: number
       const divisions: LayoutDivision[] = []
       for (let i = 0; i < combinationsCount; i++) {
         const pattern = i % 5
-        const baseRow = Math.floor(i / 5)
+        // Each block of 5 cards spans two rows (3 small + 2 medium)
+        const baseRow = Math.floor(i / 5) * 2
         
         if (pattern < 3) {
-          // Tarjetas pequeñas (2 columnas cada una)
+          // Small cards (4 columns each)
           divisions.push({ 
             x: pattern * 4, 
             y: baseRow, 
@@ -383,7 +384,7 @@ export function getRealLayoutDivisions(layout: string, combinationsCount: number
             height: GRID_CONFIG.DEFAULT_HEIGHT 
           })
         } else {
-          // Tarjetas medianas (3 columnas cada una)
+          // Medium cards (6 columns each)
           divisions.push({ 
             x: (pattern - 3) * 6, 
             y: baseRow + 1, 
