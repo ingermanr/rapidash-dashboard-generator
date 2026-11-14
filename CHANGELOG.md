@@ -15,7 +15,15 @@
 - Eliminadas ~800 líneas de layouts y helpers de PDF que no se usaban en la vista detallada.
 - Eliminados los `console.log` de depuración.
 
+### Arquitectura
+- La lógica de generación (combinaciones, layouts y paletas) y los datos de ejemplo viven en `lib/domain/`, sin dependencias de React y con tests unitarios.
+- Aleatoriedad inyectable con `createSeededRandom`: la generación es reproducible en tests.
+
 ### Correcciones
+- Los datos de ejemplo de cada gráfico ya no cambian en cada re-render (por ejemplo al usar filtros o cambiar el tema): se generan con una semilla derivada del id de la combinación.
+- Las variables con "trimestre" en el nombre muestran trimestres (Q1-Q4) en lugar de meses.
+- Los dashboards con 11 a 15 visualizaciones usan los layouts pensados para ese rango; antes caían en los layouts para 31 o más.
+- El layout "Staggered" ya no superpone tarjetas desde la sexta visualización.
 - Las notificaciones (toasts) ahora se muestran: faltaba montar `<Toaster />` en el layout raíz.
 - Generar una variante ahora respeta las combinaciones excluidas agregadas después de cargar las variables (closure desactualizado en `useCallback`).
 - Corregidos los errores de tipos en los fixtures de tests.

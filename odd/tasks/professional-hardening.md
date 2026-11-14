@@ -17,7 +17,8 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T3 (S1) Single lockfile (npm), Node LTS pin, remove unused deps/UI/dead files; render missing `<Toaster />` — inline — 10ff044
 - [x] T4 (S1) ESLint flat config, zero warnings, remove debug `console.*` — inline — 0dcd4ec
 - [x] T5 (S1) GitHub Actions CI — inline — 94920cd
-- [ ] T6 (S2) Domain extraction + seeded RNG + tests
+- [x] T6a (S2) Extract variant generation from `app/page.tsx` to `lib/domain/variant-generator.ts` with injected `random`/`now` + seeded RNG + tests — inline
+- [x] T6b (S2) Extract mock data generation from `components/dashboard-detailed-preview.tsx` to `lib/domain/` with injected RNG + tests — inline
 - [ ] T7 (S3) UI split + behavior tests
 - [ ] T8 (S4) Product improvements (pending definition)
 
@@ -34,3 +35,6 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L7 (2026-11-13) User: "cambia el repo a publico y corrige las observaciones". Repo made public after a history secret scan (0 hits). CI had `startup_failure` while private.
 - L8 Review of 0dcd4ec..HEAD approved and acknowledged. Fixed its notes: regression test for the exclusion fix (RED without fix, GREEN with it, 8/8 stable runs); `ActionType` as a type; PDF-only distribution renamed `getPdfLayoutDivisions`; actions pinned to SHAs (checkout v7.0.1, setup-node v7.1.0); `cancel-in-progress` only for PRs. `npm run verify`: 29/29 tests.
 - L9 (2026-11-13) CI blocked: "The job was not started because your account is locked due to a billing issue." User: "no voy a pagar, solo hagamos el commit, push y merge" → PR #1 merged (3eff0cc). User: "borra el ci" → workflow removed; `npm run verify` is the local gate.
+- L10 (2026-11-13) User: "adelante" (phase 2). T6a: logic moved verbatim except `Math.random()`→`random()` (15) and `Date.now()`→`now()` (7). Differential check vs main: identical variants for 5 variable sets × 30 seeds. Found dead branch in `getSuitableLayouts` (7-9 range shadowed by 7-8 and 9-10).
+- L11 T6b: sample data moved to `lib/domain/sample-data.ts`; components seed it with `randomFor(combination.id)`. Fixes: values re-randomized on every render (UI test RED on old component, GREEN now); "trimestre" matched "mes" (now quarters first). Differential check vs main: 1400 identical cases (names without "trimestre").
+- L12 (2026-11-13) User: "dale, pero recuerda que estamos mejorando la herramienta, si hay que mejorar lo que sea, lo mejoramos". The "dead branch" was a bug: LARGE range constants were 7-9 instead of 11-15 (RED 3 → GREEN). New engine coverage test (1-30 combinations, every suitable layout) found "Staggered" overlapping from 6+ cards (blocks span 2 rows but advanced 1); fixed. 109/109 tests.
