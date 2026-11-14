@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Variable, LayoutVariant, ExcludedCombination } from '@/types/dashboard'
 import { regeneratePalette } from '@/lib/domain/palettes'
+import { createSafeStorage } from '@/lib/persistence/safe-storage'
+import { reportWrite } from './persistence-status'
 import {
   PERSISTED_STATE_VERSION,
   deleteSavedDashboard,
@@ -237,7 +239,7 @@ export const useDashboardStore = create<DashboardState>()(
     }),
     {
       name: 'dashboard-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => createSafeStorage(() => localStorage, reportWrite)),
       version: PERSISTED_STATE_VERSION,
       migrate: (persisted, version) => migratePersistedState(persisted, version) as unknown as DashboardState,
       // Solo persistir datos importantes, no estados temporales
