@@ -18,6 +18,14 @@ import { exportDashboardSpecPdf } from "@/lib/pdf/dashboard-spec-pdf"
 import { useDashboardInfo } from "@/store"
 import type { LayoutVariant } from "@/types/dashboard"
 
+/** Responsive column classes that use the full width for up to four items. */
+function columnsFor(count: number): string {
+  if (count <= 1) return ""
+  if (count === 2) return "sm:grid-cols-2"
+  if (count === 3) return "sm:grid-cols-3"
+  return "sm:grid-cols-2 lg:grid-cols-4"
+}
+
 interface DashboardDetailedPreviewProps {
   variant: LayoutVariant
   dashboardTitle?: string
@@ -165,7 +173,7 @@ export function DashboardDetailedPreview({
                 </Button>
               )}
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className={`grid grid-cols-1 gap-3 ${columnsFor(filterableVariables.length)}`}>
               {filterableVariables.map((variable) => (
                 <FilterCard
                   key={variable.id}
@@ -189,7 +197,7 @@ export function DashboardDetailedPreview({
                 <p className="text-xs text-muted-foreground">Indicadores clave de rendimiento</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className={`grid grid-cols-1 gap-3 ${columnsFor(independentVariables.length)}`}>
               {independentVariables.map((variable, index) => (
                 <IndependentVariableCard
                   key={variable.id}
