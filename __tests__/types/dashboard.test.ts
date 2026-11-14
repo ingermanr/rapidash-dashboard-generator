@@ -36,7 +36,8 @@ describe('Dashboard Types', () => {
       const variable: Variable = {
         id: 'var-1',
         name: 'Sales',
-        type: 'numeric'
+        type: 'numeric',
+        priority: 'alta'
       }
 
       expect(variable.id).toBe('var-1')
@@ -50,13 +51,15 @@ describe('Dashboard Types', () => {
       const numericVar: Variable = {
         id: 'var-1',
         name: 'Sales',
-        type: 'numeric'
+        type: 'numeric',
+        priority: 'alta'
       }
 
       const categoricalVar: Variable = {
         id: 'var-2',
         name: 'Region',
-        type: 'categorical'
+        type: 'categorical',
+        priority: 'media'
       }
 
       const combination: VariableCombination = {
@@ -78,7 +81,8 @@ describe('Dashboard Types', () => {
       const numericVar: Variable = {
         id: 'var-1',
         name: 'Sales',
-        type: 'numeric'
+        type: 'numeric',
+        priority: 'alta'
       }
 
       const validChartTypes = [
@@ -116,8 +120,8 @@ describe('Dashboard Types', () => {
   describe('LayoutVariant Interface', () => {
     it('should create a valid LayoutVariant object', () => {
       const variables: Variable[] = [
-        { id: 'var-1', name: 'Sales', type: 'numeric' },
-        { id: 'var-2', name: 'Region', type: 'categorical' }
+        { id: 'var-1', name: 'Sales', type: 'numeric', priority: 'alta' },
+        { id: 'var-2', name: 'Region', type: 'categorical', priority: 'media' }
       ]
 
       const combinations: VariableCombination[] = [

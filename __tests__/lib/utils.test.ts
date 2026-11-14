@@ -41,8 +41,8 @@ describe('Utils Functions', () => {
     })
 
     it('should handle complex conditional logic', () => {
-      const variant = 'primary'
-      const size = 'lg'
+      const variant: string = 'primary'
+      const size: string = 'lg'
       const disabled = false
 
       const result = cn(
