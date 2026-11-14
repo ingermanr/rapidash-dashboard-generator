@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { BarChart3, Download, Filter, TrendingUp, X } from "lucide-react"
+import { BarChart3, Download, Filter, Shuffle, TrendingUp, X } from "lucide-react"
 import { DashboardGrid } from "@/components/dashboard-preview/dashboard-grid"
 import { FilterCard } from "@/components/dashboard-preview/filter-card"
 import { PreviewFiltersProvider } from "@/components/dashboard-preview/preview-filters"
+import { usePaletteColors } from "@/components/dashboard-preview/use-color-mode"
+import { PaletteSwatches } from "@/components/palette-swatches"
 import { IndependentVariableCard } from "@/components/dashboard-preview/independent-variable-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,14 +22,18 @@ interface DashboardDetailedPreviewProps {
   variant: LayoutVariant
   dashboardTitle?: string
   dashboardDescription?: string
+  /** When provided, shows a button that swaps the palette while keeping the layout. */
+  onRegeneratePalette?: () => void
 }
 
 export function DashboardDetailedPreview({
   variant,
   dashboardTitle: propTitle,
   dashboardDescription: propDescription,
+  onRegeneratePalette,
 }: DashboardDetailedPreviewProps) {
   const { combinations, variables } = variant
+  const paletteColors = usePaletteColors(variant.palette)
   
   // Get dashboard info from store, fallback to props
   const { dashboardTitle: storeTitle, dashboardDescription: storeDescription } = useDashboardInfo()
@@ -91,6 +97,21 @@ export function DashboardDetailedPreview({
                       <Badge variant="outline" className="bg-accent/10 text-accent-foreground border-accent/20 text-xs px-2 py-0.5">
                         {variant.palette.name}
                       </Badge>
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <PaletteSwatches palette={variant.palette} className="w-48" />
+                      {onRegeneratePalette && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={onRegeneratePalette}
+                          className="h-7 gap-1.5 px-2 text-xs"
+                        >
+                          <Shuffle className="h-3.5 w-3.5" aria-hidden="true" />
+                          Otra paleta
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -173,7 +194,7 @@ export function DashboardDetailedPreview({
                 <IndependentVariableCard
                   key={variable.id}
                   variable={variable}
-                  color={variant.palette.colors[index % variant.palette.colors.length]}
+                  color={paletteColors[index % paletteColors.length]}
                 />
               ))}
             </div>

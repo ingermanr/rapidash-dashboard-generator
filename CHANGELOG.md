@@ -21,6 +21,11 @@
 - `app/page.tsx` quedó en 51 líneas: elige entre `LandingView`, `BuilderView` y `VariantDetailView` (`components/generator/`).
 - La vista detallada pasó de un archivo de 2841 líneas a un contenedor de 234 líneas más componentes en `components/dashboard-preview/` (un archivo por gráfico) y la exportación a PDF en `lib/pdf/`.
 
+### Paletas de color
+- 11 paletas nuevas que reemplazan las 56 anteriores (solo 8 de ellas pasaban las validaciones de color). Cada una tiene su versión para modo claro y para modo oscuro, y se validaron contra las superficies reales de las tarjetas: banda de luminosidad, saturación mínima, separación para daltonismo (ΔE ≥ 8), separación con visión normal (ΔE ≥ 15) y contraste de 3:1.
+- Botón "Otra paleta" en cada variante y en la vista detallada: cambia solo los colores y mantiene la distribución y las visualizaciones.
+- Las muestras de color son botones accesibles con teclado; muestran el código hex al pasar el cursor o al enfocarlas, y lo copian al hacer clic.
+
 ### Correcciones
 - Los layouts llenan todo el espacio del dashboard: antes solo 51 de 169 combinaciones de layout y cantidad de visualizaciones lo hacían ("Grid" con una sola visualización usaba el 33%). Las filas incompletas se reparten en partes iguales.
 - Los filtros de la vista detallada ahora afectan a los gráficos: los números de ejemplo cambian según el filtro, los gráficos por la variable filtrada muestran solo la categoría elegida y el filtro de período cambia los puntos de tiempo. Elegir "Todas" ya no cuenta como filtro activo, y se quitó la opción "Personalizado", que no hacía nada.

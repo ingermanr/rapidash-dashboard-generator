@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Variable, LayoutVariant, ExcludedCombination } from '@/types/dashboard'
+import { regeneratePalette } from '@/lib/domain/palettes'
 
 export interface DashboardState {
   // Estado del dashboard
@@ -40,6 +41,7 @@ export interface DashboardState {
   setCurrentVariant: (variant: LayoutVariant | null) => void
   addToHistory: (variant: LayoutVariant) => void
   removeFromHistory: (variantId: string) => void
+  regenerateVariantPalette: (variantId: string) => void
   setSelectedVariant: (variant: LayoutVariant | null) => void
   setIsGenerating: (generating: boolean) => void
   clearHistory: () => void
@@ -134,6 +136,22 @@ export const useDashboardStore = create<DashboardState>()(
         currentVariant: state.currentVariant?.id === variantId ? null : state.currentVariant,
       })),
       
+      regenerateVariantPalette: (variantId) => set((state) => {
+        const source =
+          state.generationHistory.find(v => v.id === variantId) ??
+          (state.currentVariant?.id === variantId ? state.currentVariant : null) ??
+          (state.selectedVariant?.id === variantId ? state.selectedVariant : null)
+        if (!source) return {}
+        // Only the palette changes; layout, combinations and id stay the same
+        const updated = regeneratePalette(source, state.generationHistory)
+        const replace = (v: LayoutVariant | null) => (v?.id === variantId ? updated : v)
+        return {
+          generationHistory: state.generationHistory.map(v => (v.id === variantId ? updated : v)),
+          currentVariant: replace(state.currentVariant),
+          selectedVariant: replace(state.selectedVariant),
+        }
+      }),
+
       setSelectedVariant: (variant) => set({ selectedVariant: variant }),
       
       setIsGenerating: (generating) => set({ isGenerating: generating }),

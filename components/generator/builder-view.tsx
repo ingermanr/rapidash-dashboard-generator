@@ -27,7 +27,8 @@ export function BuilderView({ onStartOver }: BuilderViewProps) {
     addToHistory,
     setIsGenerating,
     setSelectedVariant,
-    removeFromHistory
+    removeFromHistory,
+    regenerateVariantPalette,
   } = useLayouts()
   const { dashboardTitle, dashboardDescription, setDashboardTitle, setDashboardDescription } = useDashboardInfo()
 
@@ -248,6 +249,7 @@ export function BuilderView({ onStartOver }: BuilderViewProps) {
               index={0}
               onSelect={() => setSelectedVariant(currentVariant)}
               onDelete={deleteVariant}
+              onRegeneratePalette={() => regenerateVariantPalette(currentVariant.id)}
             />
           </div>
         )}
@@ -278,6 +280,7 @@ export function BuilderView({ onStartOver }: BuilderViewProps) {
                     index={index}
                     onSelect={() => setSelectedVariant(variant)}
                     onDelete={deleteVariant}
+                    onRegeneratePalette={() => regenerateVariantPalette(variant.id)}
                   />
                 ))}
             </div>

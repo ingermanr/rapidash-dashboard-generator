@@ -10,6 +10,7 @@ import { ProgressBar } from "@/components/dashboard-preview/charts/progress-bar"
 import { RadialChart } from "@/components/dashboard-preview/charts/radial-chart"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
+import { usePaletteColors } from "@/components/dashboard-preview/use-color-mode"
 import type { LayoutVariant, VariableCombination } from "@/types/dashboard"
 
 export interface CombinationCardProps {
@@ -21,7 +22,8 @@ export interface CombinationCardProps {
 
 export function CombinationCard({ combination, palette, index, size }: CombinationCardProps) {
   const heightClass = size === "large" ? "h-96" : size === "medium" ? "h-80" : "h-64"
-  const color = palette.colors[index % palette.colors.length]
+  const colors = usePaletteColors(palette)
+  const color = colors[index % colors.length]
 
   return (
     <Card className={`${heightClass} group relative overflow-hidden rounded-xl bg-gradient-to-br from-background/80 to-background/40 backdrop-blur-sm border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5`}>
@@ -74,13 +76,13 @@ export function CombinationCard({ combination, palette, index, size }: Combinati
             {combination.chartType === "line" && <LineChart color={color} combination={combination} size={size} />}
             {combination.chartType === "area" && <AreaChart color={color} combination={combination} size={size} />}
             {combination.chartType === "pie" && (
-              <PieChart colors={palette.colors} combination={combination} size={size} />
+              <PieChart colors={colors} combination={combination} size={size} />
             )}
             {combination.chartType === "donut" && (
-              <DonutChart colors={palette.colors} combination={combination} size={size} />
+              <DonutChart colors={colors} combination={combination} size={size} />
             )}
             {combination.chartType === "radial" && (
-              <RadialChart colors={palette.colors} combination={combination} size={size} />
+              <RadialChart colors={colors} combination={combination} size={size} />
             )}
             {combination.chartType === "progress" && <ProgressBar color={color} size={size} seedKey={combination.id} />}
             {combination.chartType === "metric" && <MetricDisplay color={color} name={combination.name} size={size} seedKey={combination.id} />}

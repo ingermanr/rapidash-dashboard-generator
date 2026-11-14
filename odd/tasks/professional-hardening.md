@@ -25,7 +25,7 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T8b (S4) Layouts fill the whole grid (`fillEmptySpace`) — inline
 - [x] T8c (S4) PDF diagram uses the layout engine — inline
 - [x] T8d (S4) Filters affect the preview charts — inline
-- [ ] T8e (S4) Modern palettes, better color presentation, regenerate palette independently of the layout — inline
+- [x] T8e (S4) Modern palettes, better color presentation, regenerate palette independently of the layout — inline
 
 Route evidence: phase 1 units are small and sequential; no writer trigger applies.
 
@@ -50,3 +50,4 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L17 T8c: PDF now uses `getRealLayoutDivisions`. Its hardcoded distribution was capped at 12 components and reused the last cell, overlapping boxes (RED with 13/15 components). Tests cover 5-30 components.
 - L18 (2026-11-13) User: "incluye también una revisión sobre las combinaciones de colores y como se muestran para que sean más modernos y se puedan volver a generar independietemente de la generación de la distribución de los cuadrantes"
 - L19 T8d: `lib/domain/filters.ts` + `PreviewFiltersProvider` context. Filters reseed sample data (unfiltered key unchanged, so unfiltered output is identical), narrow charts by the filtered dimension and set time points per period. Fixed "Todas" counting as active; removed no-op "Personalizado". Both UI tests RED on main components.
+- L20 T8e: old palettes: 8/56 passed the dataviz validator in light mode, none had dark variants. Searched orderings and Tailwind steps per theme with the validator (light band 0.43-0.77 vs #f8f8f8, dark band 0.48-0.67 vs #060606): 11 themes pass both modes with 0 warnings ("Tierra" had no passing order). `lib/domain/palettes.ts` (`pickPalette`, `regeneratePalette`, `paletteColors`), optional `ColorPalette.darkColors` (old saved variants still load), store `regenerateVariantPalette`, `PaletteSwatches` (keyboard-accessible buttons), "Otra paleta" buttons. 191/191 tests.
