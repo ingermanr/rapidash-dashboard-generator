@@ -113,7 +113,7 @@ export function BuilderView({ onStartOver }: BuilderViewProps) {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-3xl font-bold tracking-tight text-card-foreground">Información del Dashboard</h2>
-                  <p className="mt-1 text-base text-muted-foreground/80">Define el contexto y propósito de tu dashboard para generar visualizaciones más precisas</p>
+                  <p className="mt-1 text-base text-muted-foreground">Define el contexto y propósito de tu dashboard para generar visualizaciones más precisas</p>
                 </div>
               </div>
             </div>

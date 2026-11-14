@@ -1,5 +1,6 @@
 "use client"
 
+import { PALETTES } from "@/lib/domain/palettes"
 import { ArrowRight, BarChart3, Layout, Palette, Sparkles, Zap } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -71,6 +72,7 @@ export function LandingView({ onStart }: LandingViewProps) {
           </div>
 
           {/* Features Grid */}
+          <h2 className="sr-only">Características</h2>
           <div className="mb-20 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card className="group relative overflow-hidden border-2 border-border/50 bg-gradient-to-br from-card via-card to-muted/20 p-8 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
@@ -99,7 +101,7 @@ export function LandingView({ onStart }: LandingViewProps) {
               <div className="relative mb-6 inline-flex rounded-2xl bg-gradient-to-br from-chart-3/20 to-chart-3/10 p-4 shadow-lg transition-all group-hover:scale-110 group-hover:shadow-chart-3/20">
                 <Palette className="h-8 w-8 text-chart-3" />
               </div>
-              <h3 className="mb-4 text-xl font-bold text-card-foreground">50+ Paletas de Colores</h3>
+              <h3 className="mb-4 text-xl font-bold text-card-foreground">{PALETTES.length} Paletas de Colores</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">
                 Esquemas profesionales con <span className="font-semibold text-chart-3">alto contraste</span> y armonía visual para cada dashboard.
               </p>
@@ -143,7 +145,7 @@ export function LandingView({ onStart }: LandingViewProps) {
 
               <div className="relative group text-center lg:text-left">
                 <div className="mb-8 flex justify-center lg:justify-start">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-chart-2 to-chart-2/80 text-3xl font-bold text-white shadow-2xl shadow-chart-2/30 transition-all group-hover:scale-110 group-hover:shadow-chart-2/40">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-chart-2 to-chart-2/80 text-3xl font-bold text-primary-foreground shadow-2xl shadow-chart-2/30 transition-all group-hover:scale-110 group-hover:shadow-chart-2/40">
                     2
                   </div>
                 </div>
@@ -156,7 +158,7 @@ export function LandingView({ onStart }: LandingViewProps) {
 
               <div className="relative group text-center lg:text-left">
                 <div className="mb-8 flex justify-center lg:justify-start">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-chart-3 to-chart-3/80 text-3xl font-bold text-white shadow-2xl shadow-chart-3/30 transition-all group-hover:scale-110 group-hover:shadow-chart-3/40">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-chart-3 to-chart-3/80 text-3xl font-bold text-primary-foreground shadow-2xl shadow-chart-3/30 transition-all group-hover:scale-110 group-hover:shadow-chart-3/40">
                     3
                   </div>
                 </div>

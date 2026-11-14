@@ -32,21 +32,31 @@ export default function DashboardGenerator() {
   }, [setSelectedVariant])
 
   if (showLanding) {
-    return <LandingView onStart={handleStartCreating} />
+    return (
+      <main>
+        <LandingView onStart={handleStartCreating} />
+      </main>
+    )
   }
 
   if (selectedVariant) {
     return (
-      <VariantDetailView
-        variant={selectedVariant}
-        title={dashboardTitle}
-        description={dashboardDescription}
-        onBack={handleBackToVariants}
-        onStartOver={handleStartCreating}
-        onRegeneratePalette={() => regenerateVariantPalette(selectedVariant.id)}
-      />
+      <main>
+        <VariantDetailView
+          variant={selectedVariant}
+          title={dashboardTitle}
+          description={dashboardDescription}
+          onBack={handleBackToVariants}
+          onStartOver={handleStartCreating}
+          onRegeneratePalette={() => regenerateVariantPalette(selectedVariant.id)}
+        />
+      </main>
     )
   }
 
-  return <BuilderView onStartOver={handleStartCreating} />
+  return (
+    <main>
+      <BuilderView onStartOver={handleStartCreating} />
+    </main>
+  )
 }

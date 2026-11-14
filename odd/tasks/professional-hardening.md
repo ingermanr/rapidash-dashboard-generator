@@ -9,6 +9,7 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - S2 Phase 2 "Dominio": extract combination generation, layout selection and mock data to `lib/domain/` with a seeded RNG and unit tests.
 - S3 Phase 3 "UI": split the two giant components (layouts, charts, cards) and add behavior tests.
 - S4 Phase 4 "Producto": PDF, accessibility, persistence (to be defined with the user).
+- S5 Accessibility (user: "vamos con cualquiera de los dos" — accessibility chosen over persistence): zero axe violations on landing, builder (empty and with a variant) and detail in light and dark; WCAG AA text contrast (4.5, 3 for large text) including text over gradients; icon-only buttons named and visible on keyboard focus; charts with a text alternative; `prefers-reduced-motion` respected; landing copy matches the product.
 
 ## Tasks
 
@@ -26,6 +27,7 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T8c (S4) PDF diagram uses the layout engine — inline
 - [x] T8d (S4) Filters affect the preview charts — inline
 - [x] T8e (S4) Modern palettes, better color presentation, regenerate palette independently of the layout — inline
+- [x] T9 (S5) Accessibility pass — inline (one understood change per slice; no writer trigger) — c573883 (semantics), cca5091 (contrast)
 
 Route evidence: phase 1 units are small and sequential; no writer trigger applies.
 
@@ -52,3 +54,7 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L19 T8d: `lib/domain/filters.ts` + `PreviewFiltersProvider` context. Filters reseed sample data (unfiltered key unchanged, so unfiltered output is identical), narrow charts by the filtered dimension and set time points per period. Fixed "Todas" counting as active; removed no-op "Personalizado". Both UI tests RED on main components.
 - L20 T8e: old palettes: 8/56 passed the dataviz validator in light mode, none had dark variants. Searched orderings and Tailwind steps per theme with the validator (light band 0.43-0.77 vs #f8f8f8, dark band 0.48-0.67 vs #060606): 11 themes pass both modes with 0 warnings ("Tierra" had no passing order). `lib/domain/palettes.ts` (`pickPalette`, `regeneratePalette`, `paletteColors`), optional `ColorPalette.darkColors` (old saved variants still load), store `regenerateVariantPalette`, `PaletteSwatches` (keyboard-accessible buttons), "Otra paleta" buttons. 191/191 tests.
 - L21 Visual check with headless Chromium over CDP (browser extension unavailable): cards had fixed heights (h-64/80/96) so multi-row cells showed gaps despite 100% engine utilization; now `h-full min-h-[260px]`. Chart type badges in Spanish; filter/metric grids adapt columns to item count. Dark mode verified (no hang; the slow step was adding variables in dev mode).
+- L22 (2026-11-14) User: "vamos con cualquiera de los dos" → accessibility (persistence needs product decisions). Baseline audit (axe-core 4.11 + analytical contrast that composites ancestor backgrounds and uses the worst gradient stop; headless screenshots hung intermittently so pixel sampling was dropped): 4 unnamed icon buttons (critical), no landmarks at all (`region`, `landmark-one-main`), landing heading jump h1→h3, 13-23 light-mode text contrast failures per screen (primary/chart-2/3/4/destructive tokens as text on tints, green/red-500 trend values, white on chart-3 buttons, gradient metric numbers). Not detected by axe: delete buttons are `opacity-0` until hover (invisible on keyboard focus), charts have no text alternative, 20 animations ignore reduced motion, landing claims "50+ Paletas de Colores" but there are 11.
+- L23 Semantics slice (c573883): `<main>` per view, hidden landing h2, named icon buttons visible on `focus-visible`, filter selects named, charts `role="img"` with label, reduced-motion CSS, real palette count (11; "15+ layouts" verified true: 18). New Jest axe test RED 7/7 → GREEN. Added `axe-core@4.11.0` devDependency (already in the lockfile transitively).
+- L24 Contrast slice: OKLCH lightness solver kept hue/chroma and found the nearest AA lightness per light token (primary/accent/chart-1/ring 0.55→0.505, chart-2 0.50→0.44, chart-3 0.60→0.485, chart-4 0.65→0.505, destructive 0.55→0.515; dark destructive 0.62→0.66); status colours 700/400 pairs; step numbers use `primary-foreground`; palette-coloured badge/metric text now uses the foreground with the palette colour as tint/border; hero rainbow uses 600/700 stops in light mode. Token contrast test RED 8 → GREEN 22. Browser audit (fresh Chromium per theme; a shared session leaked light-run state into dark results): 0 axe violations and 0 contrast failures on all 8 screens. Reduced motion verified in Chromium (3s/infinite → 0.01ms/1). `npm run verify` green.
+

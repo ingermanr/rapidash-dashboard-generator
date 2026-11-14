@@ -26,12 +26,12 @@ export function MetricDisplay({ color, name, size, seedKey }: { color: string; n
         </p>
       </div>
       <div className={`flex items-center gap-2 ${size === "large" ? "text-sm" : "text-xs"} font-medium`}>
-        <TrendingUp className={`${size === "large" ? "h-4 w-4" : "h-3 w-3"} ${isPositive ? "text-green-500" : "text-red-500"}`} />
-        <span className={`font-semibold ${isPositive ? "text-green-500" : "text-red-500"}`}>
+        <TrendingUp className={`${size === "large" ? "h-4 w-4" : "h-3 w-3"} ${isPositive ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`} />
+        <span className={`font-semibold ${isPositive ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}`}>
           {isPositive ? "+" : ""}
           {change}%
         </span>
-        <span className="text-card-foreground opacity-70">vs mes anterior</span>
+        <span className="text-muted-foreground">vs mes anterior</span>
       </div>
     </div>
   )

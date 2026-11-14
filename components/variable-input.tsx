@@ -24,9 +24,9 @@ const variableTypes: { value: VariableType; label: string; icon: LucideIcon }[] 
 ]
 
 const priorityOptions: { value: VariablePriority; label: string; color: string }[] = [
-  { value: "alta", label: "Alta Importancia", color: "text-red-600" },
+  { value: "alta", label: "Alta Importancia", color: "text-red-700 dark:text-red-400" },
   { value: "media", label: "Media Importancia", color: "text-orange-500" },
-  { value: "baja", label: "Baja Importancia", color: "text-green-600" },
+  { value: "baja", label: "Baja Importancia", color: "text-green-700 dark:text-green-400" },
 ]
 
 export function VariableInput() {
@@ -279,7 +279,7 @@ export function VariableInput() {
           {/* Texto informativo compacto */}
           <div className="mt-3 border-t border-border/30 pt-2">
             <p className="text-xs text-muted-foreground">
-              💡 <span className="font-medium text-red-600">Alta prioridad</span> = espacios más grandes en el dashboard
+              💡 <span className="font-medium text-red-700 dark:text-red-400">Alta prioridad</span> = espacios más grandes en el dashboard
             </p>
           </div>
         </div>
@@ -346,7 +346,8 @@ export function VariableInput() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveVariable(variable.id)}
-                      className="h-8 w-8 p-0 text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                      aria-label={`Eliminar variable ${variable.name}`}
+                      className="h-8 w-8 p-0 text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -464,7 +465,7 @@ export function VariableInput() {
                             </span>
                           </div>
                           
-                          <span className="text-xs opacity-70 shrink-0">
+                          <span className="text-xs shrink-0">
                             {combo.maxPriority === 1 ? 'A' : combo.maxPriority === 2 ? 'M' : 'B'}
                           </span>
                         </div>
