@@ -1,5 +1,4 @@
 import { useDashboardStore } from './dashboard-store'
-import { useUIStore } from './ui-store'
 
 // Hook para variables con funciones de conveniencia
 export const useVariables = () => {
@@ -141,45 +140,5 @@ export const useDashboardInfo = () => {
     hasTitle,
     hasDescription,
     isComplete,
-  }
-}
-
-// Hook para configuración de UI
-export const useUIConfig = () => {
-  const theme = useUIStore((state) => state.theme)
-  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed)
-  const autoGenerate = useUIStore((state) => state.autoGenerate)
-  const showAdvancedOptions = useUIStore((state) => state.showAdvancedOptions)
-  const previewMode = useUIStore((state) => state.previewMode)
-  const showTooltips = useUIStore((state) => state.showTooltips)
-  const animationsEnabled = useUIStore((state) => state.animationsEnabled)
-  
-  const setTheme = useUIStore((state) => state.setTheme)
-  const setSidebarCollapsed = useUIStore((state) => state.setSidebarCollapsed)
-  const toggleSidebar = useUIStore((state) => state.toggleSidebar)
-  const setAutoGenerate = useUIStore((state) => state.setAutoGenerate)
-  const setShowAdvancedOptions = useUIStore((state) => state.setShowAdvancedOptions)
-  const setPreviewMode = useUIStore((state) => state.setPreviewMode)
-  const setShowTooltips = useUIStore((state) => state.setShowTooltips)
-  const setAnimationsEnabled = useUIStore((state) => state.setAnimationsEnabled)
-  const resetUI = useUIStore((state) => state.reset)
-
-  return {
-    theme,
-    sidebarCollapsed,
-    autoGenerate,
-    showAdvancedOptions,
-    previewMode,
-    showTooltips,
-    animationsEnabled,
-    setTheme,
-    setSidebarCollapsed,
-    toggleSidebar,
-    setAutoGenerate,
-    setShowAdvancedOptions,
-    setPreviewMode,
-    setShowTooltips,
-    setAnimationsEnabled,
-    resetUI,
   }
 }

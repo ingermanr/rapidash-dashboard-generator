@@ -37,6 +37,15 @@ async function violations(container: HTMLElement) {
 
 const screens: Array<[string, Partial<ReturnType<typeof useDashboardStore.getState>>]> = [
   ['landing', { showLanding: true }],
+  [
+    'landing with saved dashboards',
+    {
+      showLanding: true,
+      savedDashboards: [
+        { id: 'a', title: 'Ventas', description: '', variables, excludedCombinations: [], generationHistory: [variant], createdAt: 1, updatedAt: 2 },
+      ],
+    },
+  ],
   ['empty builder', { showLanding: false }],
   ['builder with a variant', { showLanding: false, variables, currentVariant: variant, generationHistory: [variant] }],
   ['variant detail', { showLanding: false, variables, currentVariant: variant, generationHistory: [variant], selectedVariant: variant }],

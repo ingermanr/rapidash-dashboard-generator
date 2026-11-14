@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback } from "react"
-import { ArrowRight, BarChart3, FileText, Layout, Sparkles } from "lucide-react"
+import { ArrowRight, BarChart3, FileText, Layout, Sparkles, FolderOpen } from "lucide-react"
 import { LayoutPreview } from "@/components/layout-preview"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -14,10 +14,11 @@ import { useDashboardInfo, useLayouts, useVariables } from "@/store"
 
 export interface BuilderViewProps {
   onStartOver: () => void
+  onShowDashboards: () => void
 }
 
 /** Main workspace: define variables, generate layout variants and browse the history. */
-export function BuilderView({ onStartOver }: BuilderViewProps) {
+export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps) {
   const { variables, excludedCombinations } = useVariables()
   const { 
     currentVariant, 
@@ -86,6 +87,10 @@ export function BuilderView({ onStartOver }: BuilderViewProps) {
               </div>
             </div>
             <div className="flex gap-3">
+              <Button onClick={onShowDashboards} variant="outline" size="sm" className="gap-2 border-2">
+                <FolderOpen className="h-4 w-4" />
+                Mis dashboards
+              </Button>
               <Button 
                 onClick={onStartOver} 
                 variant="outline" 
