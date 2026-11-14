@@ -13,6 +13,7 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 
 - S6 Persistence (user picked "Varios dashboards guardados (Recomendado)": "Lista local de dashboards: guardar, abrir, renombrar y borrar. Empezar uno nuevo ya no pierde el anterior. Sigue todo en el navegador, sin backend."). Plus hygiene found while exploring: versioned persisted schema with a migration (existing single-dashboard data becomes the first saved dashboard, nothing lost); remove the unused `ui-store`.
 - S7 Storage failures (user: "vamos con la más importante de las 4" → quota chosen as the only silent data-loss risk): a failed write (full or blocked localStorage) never throws from a user action, the user sees what happened and what to do, and the warning clears once a write succeeds.
+- S8 Corrupted storage (user: "vamos con datos corruptos"): whatever is in `dashboard-storage` (other tabs, older versions, manual edits) must not crash the app; unusable items are dropped, the rest is repaired; valid data must pass through unchanged.
 ## Tasks
 
 - [x] T1 (S1) EOL: `.gitattributes`, LF everywhere — inline — 820c8b3
@@ -33,6 +34,7 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 
 - [x] T10 (S6) Saved dashboards: domain + store v1 with migration + autosave + landing list (open/rename/delete) + builder link — inline; Risk item 1 (persisted format) → independent verifier — cb01ab3, cda8cca, 591fd54, id fallback commit
 - [x] T11 (S7) Safe storage wrapper + persistence status store + alert banner — inline
+- [ ] T12 (S8) Sanitize + repair on every storage entry point (migrate, merge, cross-tab) — inline; Risk item 1 (drops stored data) → independent verifier
 Route evidence: phase 1 units are small and sequential; no writer trigger applies.
 
 ## Log
@@ -68,4 +70,5 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L29 Advisories (non-blocking): a deleted dashboard is resurrected if another tab still has it open (deliberate: never lose the dashboard being edited); incoming entries are not shape-validated (needs corrupted storage); no QuotaExceededError handling and ~2x size for the active dashboard; `crypto.randomUUID` missing on plain-HTTP non-localhost → fixed with a `getRandomValues` v4 fallback (RED → GREEN). `npm run verify` 255/255.
 - L30 (2026-11-14) PR #7 merged (eb2da72). User: "vamos con la más importante de las 4" → quota. Evidence: zustand persist calls `storage.setItem` right after applying the state, so `QuotaExceededError` propagates out of the action while the screen already shows the change and nothing is saved. A dashboard with 10 variables and 20 layouts serializes to ~148 KB, so 15-30 dashboards reach the ~5 MB origin limit.
 - L31 T11: `lib/persistence/safe-storage.ts` wraps localStorage for zustand persist (never throws; reports ok/quota/unavailable; recognises `QuotaExceededError` and Firefox `NS_ERROR_DOM_QUOTA_REACHED`); status lives in a separate non-persisted store (`store/persistence-status.ts`) so reporting does not trigger another write; `StorageStatusBanner` (`role="alert"`) on every view, cleared by the next successful write. RED→GREEN: 5 storage unit tests, 2 UI tests. `npm run verify` 262/262. Chromium with a real quota (filled after ~5 MB): banner shown, edit kept on screen, 0 uncaught exceptions; after freeing space the next edit saves and the banner disappears.
+- L32 (2026-11-14) PR #8 merged (78c97b4). User: "vamos con datos corruptos". Entry points without element validation: same-version load (zustand uses `merge`, not `migrate`), v0 migrate (arrays only) and the cross-tab listener (array only). RED: 3 app tests (landing and builder with corrupted storage, corrupted cross-tab entries). `lib/domain/sanitize.ts` rebuilds every item (variables by type/priority, exclusions, variants kept only whole, dashboards by id, first id wins); `repairPersistedState` also reloads the open workspace from its saved entry when they disagree (otherwise autosave overwrote the entry with the corrupted workspace, found by the RED test). `sameDashboardList`/`sameWorkspace` now compare canonical JSON (sorted keys), otherwise rebuilt objects re-triggered cross-tab writes. `npm run verify` 273/273. Chromium with corrupted v1 storage: landing lists "Sano" + repaired untitled entry, "Sano" opens, 0 uncaught exceptions.
 

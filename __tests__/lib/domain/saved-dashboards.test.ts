@@ -5,6 +5,7 @@ import {
   displayTitle,
   isWorkspaceEmpty,
   migratePersistedState,
+  repairPersistedState,
   renameSavedDashboard,
   sortByRecent,
   upsertSavedDashboard,
@@ -129,7 +130,7 @@ describe('migratePersistedState', () => {
   })
 
   it('keeps a version 1 state as it is', () => {
-    const v1 = { ...v0, savedDashboards: [saved('a', 5)], activeDashboardId: 'a' }
+    const v1 = { ...v0, savedDashboards: [saved('a', 5, { description: 'KPIs' })], activeDashboardId: 'a' }
     expect(migratePersistedState(v1, 1, deps())).toEqual(v1)
   })
 })
@@ -146,5 +147,29 @@ describe('createDashboardId', () => {
     } finally {
       Object.defineProperty(crypto, 'randomUUID', { value: original, configurable: true })
     }
+  })
+})
+
+describe('repairPersistedState', () => {
+  const entry = { ...workspace, id: 'a', createdAt: 1, updatedAt: 2 }
+
+  it('reloads the open workspace from its saved entry when they disagree', () => {
+    const repaired = repairPersistedState({ dashboardTitle: '', variables: [], savedDashboards: [entry], activeDashboardId: 'a' })
+    expect(repaired).toMatchObject({ dashboardTitle: 'Ventas 2026', variables: [sales], activeDashboardId: 'a' })
+    expect(repaired.savedDashboards).toEqual([entry])
+  })
+
+  it('leaves a consistent state as it is', () => {
+    const state = {
+      dashboardTitle: 'Ventas 2026',
+      dashboardDescription: '',
+      variables: [sales],
+      excludedCombinations: [],
+      generationHistory: [],
+      selectedVariant: null,
+      savedDashboards: [entry],
+      activeDashboardId: 'a',
+    }
+    expect(repairPersistedState(state)).toEqual(state)
   })
 })

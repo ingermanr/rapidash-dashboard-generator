@@ -1,4 +1,5 @@
 import type { ExcludedCombination, LayoutVariant, Variable } from "@/types/dashboard"
+import { sanitizePersistedState } from "@/lib/domain/sanitize"
 
 /** The editable state of one dashboard, as the builder works on it. */
 export interface DashboardWorkspace {
@@ -61,7 +62,7 @@ function workspaceOf(d: DashboardWorkspace): DashboardWorkspace {
 
 /** Content equality, so reloading the same data from storage does not count as an edit. */
 function sameWorkspace(a: DashboardWorkspace, b: DashboardWorkspace): boolean {
-  return JSON.stringify(workspaceOf(a)) === JSON.stringify(workspaceOf(b))
+  return canonicalJson(workspaceOf(a)) === canonicalJson(workspaceOf(b))
 }
 
 export function displayTitle(dashboard: Pick<DashboardWorkspace, "title">): string {
@@ -114,9 +115,6 @@ export function sortByRecent(saved: SavedDashboard[]): SavedDashboard[] {
   return [...saved].sort((a, b) => b.updatedAt - a.updatedAt)
 }
 
-const asArray = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : [])
-const asString = (value: unknown): string => (typeof value === "string" ? value : "")
-
 export interface PersistedDashboardStateV1 {
   dashboardTitle: string
   dashboardDescription: string
@@ -131,24 +129,24 @@ export interface PersistedDashboardStateV1 {
 export const PERSISTED_STATE_VERSION = 1
 
 /**
- * Upgrades what an older version of the app left in storage. Version 0 kept a single dashboard; it becomes the
- * first saved dashboard so the user loses nothing.
+ * Upgrades and repairs what an older version of the app left in storage. Version 0 kept a single dashboard; it
+ * becomes the first saved dashboard so the user loses nothing. Invalid items are dropped (see `sanitize`).
  */
 export function migratePersistedState(
   persisted: unknown,
   version: number,
   deps: SavedDashboardDeps = defaultSavedDashboardDeps,
 ): PersistedDashboardStateV1 {
-  const state = (persisted && typeof persisted === "object" ? persisted : {}) as Record<string, unknown>
-  if (version >= PERSISTED_STATE_VERSION) return state as unknown as PersistedDashboardStateV1
+  if (version >= PERSISTED_STATE_VERSION) return repairPersistedState(persisted)
+  const state = sanitizePersistedState(persisted)
 
   const base = {
-    dashboardTitle: asString(state.dashboardTitle),
-    dashboardDescription: asString(state.dashboardDescription),
-    variables: asArray<Variable>(state.variables),
-    excludedCombinations: asArray<ExcludedCombination>(state.excludedCombinations),
-    generationHistory: asArray<LayoutVariant>(state.generationHistory),
-    selectedVariant: (state.selectedVariant as LayoutVariant | null | undefined) ?? null,
+    dashboardTitle: state.dashboardTitle,
+    dashboardDescription: state.dashboardDescription,
+    variables: state.variables,
+    excludedCombinations: state.excludedCombinations,
+    generationHistory: state.generationHistory,
+    selectedVariant: state.selectedVariant,
   }
   const { saved, activeId } = upsertSavedDashboard(
     [],
@@ -165,10 +163,47 @@ export function migratePersistedState(
   return { ...base, savedDashboards: saved, activeDashboardId: activeId }
 }
 
+/**
+ * Valid, self-consistent state from whatever storage holds. When the open workspace disagrees with its saved
+ * entry (only possible after corruption or manual edits), the saved entry wins: it is what the user sees and picks,
+ * and keeping the workspace would make autosave overwrite it.
+ */
+export function repairPersistedState(value: unknown): PersistedDashboardStateV1 {
+  const state = sanitizePersistedState(value)
+  const active = state.savedDashboards.find((d) => d.id === state.activeDashboardId)
+  if (!active) return state
+  const workspace: DashboardWorkspace = {
+    title: state.dashboardTitle,
+    description: state.dashboardDescription,
+    variables: state.variables,
+    excludedCombinations: state.excludedCombinations,
+    generationHistory: state.generationHistory,
+  }
+  if (sameWorkspace(active, workspace)) return state
+  return {
+    ...state,
+    dashboardTitle: active.title,
+    dashboardDescription: active.description,
+    variables: active.variables,
+    excludedCombinations: active.excludedCombinations,
+    generationHistory: active.generationHistory,
+    selectedVariant: active.generationHistory.some((v) => v.id === state.selectedVariant?.id) ? state.selectedVariant : null,
+  }
+}
+
+/** JSON with object keys sorted, so equal content compares equal whatever order its keys were built in. */
+function canonicalJson(value: unknown): string {
+  return JSON.stringify(value, (_key, v) =>
+    v && typeof v === "object" && !Array.isArray(v)
+      ? Object.fromEntries(Object.entries(v as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)))
+      : v,
+  )
+}
+
 /** Same dashboards with the same content, in any order. */
 export function sameDashboardList(a: SavedDashboard[], b: SavedDashboard[]): boolean {
   if (a.length !== b.length) return false
-  const key = (list: SavedDashboard[]) => JSON.stringify([...list].sort((x, y) => x.id.localeCompare(y.id)))
+  const key = (list: SavedDashboard[]) => canonicalJson([...list].sort((x, y) => x.id.localeCompare(y.id)))
   return key(a) === key(b)
 }
 
