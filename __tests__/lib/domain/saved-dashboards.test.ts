@@ -1,5 +1,6 @@
 import {
   UNTITLED_DASHBOARD,
+  createDashboardId,
   deleteSavedDashboard,
   displayTitle,
   isWorkspaceEmpty,
@@ -130,5 +131,20 @@ describe('migratePersistedState', () => {
   it('keeps a version 1 state as it is', () => {
     const v1 = { ...v0, savedDashboards: [saved('a', 5)], activeDashboardId: 'a' }
     expect(migratePersistedState(v1, 1, deps())).toEqual(v1)
+  })
+})
+
+describe('createDashboardId', () => {
+  it('works without crypto.randomUUID (plain HTTP outside localhost is not a secure context)', () => {
+    const original = crypto.randomUUID
+    Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true })
+    try {
+      const a = createDashboardId()
+      const b = createDashboardId()
+      expect(a).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+      expect(a).not.toBe(b)
+    } finally {
+      Object.defineProperty(crypto, 'randomUUID', { value: original, configurable: true })
+    }
   })
 })
