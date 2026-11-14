@@ -55,11 +55,8 @@ Tipos de gráficos soportados:
 - Métricas numéricas
 
 #### Paletas de Colores:
-- Professional Blue
-- Vibrant Rainbow
-- Warm Sunset
-- Cool Ocean
-- Earth Tones
+11 paletas validadas en modo claro y oscuro (Aurora, Océano, Atardecer, Bosque, Vibrante, Corporativo, Cítrico,
+Nórdico, Lavanda, Brasa, Medianoche). "Otra paleta" cambia la paleta de un layout sin tocar su distribución.
 
 ### 📄 **Exportación a PDF**
 - Especificaciones completas del dashboard
@@ -67,6 +64,13 @@ Tipos de gráficos soportados:
 - Información detallada de variables
 - Combinaciones de datos
 - Header y footer profesionales
+
+### 💾 **Dashboards Guardados**
+- Todo se guarda solo en este navegador (`localStorage`), sin cuentas ni servidor
+- Varios dashboards: abrir, renombrar y eliminar desde "Tus dashboards" en la página inicial
+- Empezar uno nuevo no pierde el anterior; las pestañas abiertas se mantienen sincronizadas
+- Exportar uno o todos a un archivo `.json` e importarlo en otro navegador o máquina
+- Si el almacenamiento está lleno o bloqueado, un aviso lo indica; los datos dañados se reparan al cargar
 
 ---
 
@@ -194,6 +198,13 @@ dashboard-generator/
 - Obtén especificaciones completas
 - Listas para compartir con desarrolladores
 
+### 7. **Guardar, Exportar e Importar**
+- Los cambios se guardan automáticamente en el dashboard abierto
+- "Mis dashboards" (en el constructor) vuelve a la lista de dashboards guardados
+- "Exportar" descarga un dashboard; "Exportar todos" descarga la lista completa
+- "Importar" carga un archivo exportado: los dashboards se agregan sin reemplazar los existentes y se
+  descartan los que estén dañados
+
 ---
 
 ## 🏗️ Arquitectura
@@ -229,7 +240,13 @@ const { currentVariant, generationHistory, selectedVariant } = useLayouts()
 
 // Información del dashboard
 const { dashboardTitle, dashboardDescription } = useDashboardInfo()
+
+// Dashboards guardados (el dashboard abierto se autoguarda en `savedDashboards`)
+const { savedDashboards, openDashboard, importDashboards } = useDashboardStore.getState()
 ```
+
+El estado persistido tiene versión (`version: 1`, con migración desde la versión anterior) y todo lo que se lee
+del almacenamiento pasa por `lib/domain/sanitize.ts` antes de llegar a los componentes.
 
 ### **Sistema de Tipos**
 TypeScript completo para type-safety:

@@ -70,6 +70,7 @@ export interface DashboardState {
   openDashboard: (id: string) => void
   renameDashboard: (id: string, title: string) => void
   deleteDashboard: (id: string) => void
+  importDashboards: (dashboards: SavedDashboard[]) => void
 
   // Utilidades
   reset: () => void
@@ -229,6 +230,10 @@ export const useDashboardStore = create<DashboardState>()(
       renameDashboard: (id, title) => set((state) => ({
         savedDashboards: renameSavedDashboard(state.savedDashboards, id, title),
         ...(state.activeDashboardId === id ? { dashboardTitle: title.trim() } : {}),
+      })),
+
+      importDashboards: (dashboards) => set((state) => ({
+        savedDashboards: [...dashboards, ...state.savedDashboards],
       })),
 
       deleteDashboard: (id) => set((state) => ({
