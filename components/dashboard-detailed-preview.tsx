@@ -581,8 +581,9 @@ export function DashboardDetailedPreview({
       const layoutName = userLayout.charAt(0).toUpperCase() + userLayout.slice(1)
       doc.text(`Layout: ${layoutName} (${combinations.length} componentes)`, gridX, gridY - 10)
 
-      // Obtener las divisiones reales del layout usando el layout engine
-      const getRealLayoutDivisions = (layout: string, numCombinations: number) => {
+      // PDF-only hardcoded distribution. It does NOT use the layout engine, so the PDF diagram
+      // can differ from the on-screen preview (tracked for phase 4).
+      const getPdfLayoutDivisions = (layout: string, numCombinations: number) => {
         // Distribuciones optimizadas que reflejan mejor los layouts reales
         const numComps = Math.min(numCombinations, 12)
         
@@ -730,7 +731,7 @@ export function DashboardDetailedPreview({
 
       type LayoutDivision = { x: number; y: number; w: number; h: number }
       // Obtener las divisiones usando el layout exacto seleccionado por el usuario
-      const divisions: LayoutDivision[] = getRealLayoutDivisions(userLayout, combinations.length)
+      const divisions: LayoutDivision[] = getPdfLayoutDivisions(userLayout, combinations.length)
       const maxRows = Math.max(...divisions.map((d: LayoutDivision) => d.y + d.h))
       const gridColWidth = gridWidth / 12 // Ancho de columna ULTRA pequeño (120/12 = 10pt por columna)
       const cellRowHeight = Math.min(25, gridHeight / Math.max(maxRows, 3)) // Altura también reducida
