@@ -18,6 +18,7 @@
 ### Arquitectura
 - La lógica de generación (combinaciones, layouts y paletas) y los datos de ejemplo viven en `lib/domain/`, sin dependencias de React y con tests unitarios.
 - Aleatoriedad inyectable con `createSeededRandom`: la generación es reproducible en tests.
+- `app/page.tsx` quedó en 51 líneas: elige entre `LandingView`, `BuilderView` y `VariantDetailView` (`components/generator/`).
 - La vista detallada pasó de un archivo de 2841 líneas a un contenedor de 234 líneas más componentes en `components/dashboard-preview/` (un archivo por gráfico) y la exportación a PDF en `lib/pdf/`.
 
 ### Correcciones

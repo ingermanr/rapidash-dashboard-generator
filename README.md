@@ -111,7 +111,7 @@ No hay CI remoto: ejecuta `npm run verify` y asegúrate de que pase antes de abr
 dashboard-generator/
 ├── app/                      # Next.js App Router
 │   ├── layout.tsx           # Layout raíz
-│   ├── page.tsx             # Página principal
+│   ├── page.tsx             # Elige la vista según el estado
 │   └── globals.css          # Estilos globales
 │
 ├── components/              # Componentes React
@@ -122,6 +122,7 @@ dashboard-generator/
 │   │   ├── dashboard-grid.tsx          # Render del layout en el grid
 │   │   ├── filter-card.tsx             # Filtro por variable
 │   │   └── independent-variable-card.tsx
+│   ├── generator/                      # Vistas de la app: landing, constructor y detalle
 │   ├── layout-preview.tsx              # Preview de layouts
 │   ├── variable-input.tsx              # Input de variables
 │   ├── theme-toggle.tsx                # Toggle de tema
