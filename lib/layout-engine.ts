@@ -25,7 +25,103 @@ export const GRID_CONFIG = {
  */
 export function getRealLayoutDivisions(layout: string, combinationsCount: number): LayoutDivision[] {
   if (combinationsCount === 0) return []
-  
+  return fillEmptySpace(getBaseLayoutDivisions(layout, combinationsCount))
+}
+
+/**
+ * Expands divisions so they cover every cell of the grid without changing its height.
+ *
+ * 1. Self-contained row bands (cards sharing the same rows that nothing else crosses) are
+ *    redistributed proportionally to span all 12 columns, so incomplete rows stay balanced.
+ * 2. Any remaining empty cell is absorbed by growing neighbouring cards horizontally, then vertically.
+ */
+export function fillEmptySpace(divisions: LayoutDivision[]): LayoutDivision[] {
+  if (divisions.length === 0) return []
+  const result = divisions.map((division) => ({ ...division }))
+  const columns = GRID_CONFIG.COLUMNS
+  const { maxRows } = getGridDimensions(result)
+
+  // 1. Balance self-contained row bands.
+  const bands = new Map<string, LayoutDivision[]>()
+  for (const division of result) {
+    const key = `${division.y}:${division.height}`
+    bands.set(key, [...(bands.get(key) ?? []), division])
+  }
+  for (const band of bands.values()) {
+    const { y, height } = band[0]
+    const crossedByOthers = result.some(
+      (other) => !band.includes(other) && other.y < y + height && other.y + other.height > y,
+    )
+    const used = band.reduce((sum, division) => sum + division.width, 0)
+    if (crossedByOthers || used >= columns || band.length > columns) continue
+
+    band.sort((a, b) => a.x - b.x)
+    const exact = band.map((division) => (division.width / used) * columns)
+    const widths = exact.map(Math.floor)
+    let remainder = columns - widths.reduce((sum, width) => sum + width, 0)
+    const byFraction = exact.map((value, index) => ({ index, fraction: value - Math.floor(value) }))
+    byFraction.sort((a, b) => b.fraction - a.fraction || a.index - b.index)
+    for (const { index } of byFraction) {
+      if (remainder === 0) break
+      widths[index]++
+      remainder--
+    }
+    let x = 0
+    band.forEach((division, index) => {
+      division.x = x
+      division.width = widths[index]
+      x += widths[index]
+    })
+  }
+
+  // 2. Grow cards into any cells that are still empty.
+  const isFree = (row: number, column: number) =>
+    !result.some(
+      (division) =>
+        row >= division.y && row < division.y + division.height && column >= division.x && column < division.x + division.width,
+    )
+  const columnFree = (division: LayoutDivision, column: number) => {
+    if (column < 0 || column >= columns) return false
+    for (let row = division.y; row < division.y + division.height; row++) if (!isFree(row, column)) return false
+    return true
+  }
+  const rowFree = (division: LayoutDivision, row: number) => {
+    if (row < 0 || row >= maxRows) return false
+    for (let column = division.x; column < division.x + division.width; column++) if (!isFree(row, column)) return false
+    return true
+  }
+
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const division of result) {
+      while (columnFree(division, division.x + division.width)) {
+        division.width++
+        changed = true
+      }
+      while (columnFree(division, division.x - 1)) {
+        division.x--
+        division.width++
+        changed = true
+      }
+    }
+    for (const division of result) {
+      while (rowFree(division, division.y + division.height)) {
+        division.height++
+        changed = true
+      }
+      while (rowFree(division, division.y - 1)) {
+        division.y--
+        division.height++
+        changed = true
+      }
+    }
+  }
+  return result
+}
+
+/** Base design of each layout, before empty space is filled. */
+function getBaseLayoutDivisions(layout: string, combinationsCount: number): LayoutDivision[] {
   switch (layout) {
     case "Grid": {
       // Grid simple de 3 columnas

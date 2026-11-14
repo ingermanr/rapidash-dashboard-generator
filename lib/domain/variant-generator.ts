@@ -1,5 +1,4 @@
 import type { Variable, LayoutVariant, VariableCombination, ExcludedCombination } from "@/types/dashboard"
-import { getRealLayoutDivisions, analyzeLayoutQuality } from "@/lib/layout-engine"
 import type { RandomSource } from "./random"
 
 /** Side-effect sources used by generation. Inject them to make results reproducible. */
@@ -713,25 +712,6 @@ export function generateSingleLayoutVariant(
     palette = fallbackPalettes.length > 0
       ? fallbackPalettes[Math.floor(random() * fallbackPalettes.length)]
       : palettes[Math.floor(random() * palettes.length)]
-  }
-
-  // Validación y optimización del layout seleccionado
-  const divisions = getRealLayoutDivisions(layout, combinations.length)
-  const quality = analyzeLayoutQuality(divisions)
-  
-  // Si el aprovechamiento del espacio es muy bajo, intentar un layout más eficiente
-  if (quality.spaceUtilization < 60 && layoutScores.length > 1) {
-    // Buscar un layout alternativo con mejor aprovechamiento
-    for (let i = 1; i < Math.min(3, layoutScores.length); i++) {
-      const alternativeLayout = layoutScores[i].layout
-      const altDivisions = getRealLayoutDivisions(alternativeLayout, combinations.length)
-      const altQuality = analyzeLayoutQuality(altDivisions)
-      
-      if (altQuality.spaceUtilization > quality.spaceUtilization + 15) {
-        layout = alternativeLayout
-        break
-      }
-    }
   }
 
   return {

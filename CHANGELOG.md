@@ -22,6 +22,8 @@
 - La vista detallada pasó de un archivo de 2841 líneas a un contenedor de 234 líneas más componentes en `components/dashboard-preview/` (un archivo por gráfico) y la exportación a PDF en `lib/pdf/`.
 
 ### Correcciones
+- Los layouts llenan todo el espacio del dashboard: antes solo 51 de 169 combinaciones de layout y cantidad de visualizaciones lo hacían ("Grid" con una sola visualización usaba el 33%). Las filas incompletas se reparten en partes iguales.
+- Se quitaron las menciones a IA: la generación es automática y basada en reglas.
 - Los datos de ejemplo de cada gráfico ya no cambian en cada re-render (por ejemplo al usar filtros o cambiar el tema): se generan con una semilla derivada del id de la combinación.
 - Los errores al generar el PDF se muestran con una notificación en lugar de un `alert()` que bloqueaba la página.
 - Las variables con "trimestre" en el nombre muestran trimestres (Q1-Q4) en lugar de meses.

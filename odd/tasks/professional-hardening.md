@@ -21,7 +21,10 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T6b (S2) Extract mock data generation from `components/dashboard-detailed-preview.tsx` to `lib/domain/` with injected RNG + tests — inline
 - [x] T7a (S3) Split `dashboard-detailed-preview.tsx` (container + `components/dashboard-preview/*` + `lib/pdf/`) + behavior tests — inline
 - [x] T7b (S3) Split `app/page.tsx` views + behavior tests — inline
-- [ ] T8 (S4) Product improvements (pending definition)
+- [x] T8a (S4) Remove inaccurate AI claims — inline — 1a7eb43
+- [x] T8b (S4) Layouts fill the whole grid (`fillEmptySpace`) — inline
+- [ ] T8c (S4) PDF diagram uses the layout engine — inline
+- [ ] T8d (S4) Filters affect the preview charts — inline
 
 Route evidence: phase 1 units are small and sequential; no writer trigger applies.
 
@@ -41,3 +44,5 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L12 (2026-11-13) User: "dale, pero recuerda que estamos mejorando la herramienta, si hay que mejorar lo que sea, lo mejoramos". The "dead branch" was a bug: LARGE range constants were 7-9 instead of 11-15 (RED 3 → GREEN). New engine coverage test (1-30 combinations, every suitable layout) found "Staggered" overlapping from 6+ cards (blocks span 2 rows but advanced 1); fixed. 109/109 tests.
 - L13 (2026-11-13) User: "dale" (phase 3). T7a: scripted split by verified line ranges; preview 1810 → 234 lines. Differential vs original: identical HTML (React ids normalized) and identical jsPDF call log for 60 variants, 16 layouts, 8 chart types, 42,923 calls. PDF errors now use a destructive toast instead of `alert()` (RED on old). Finding for phase 4: filters only change local state; no chart reads them.
 - L14 T7b: `app/page.tsx` 561 → 51 lines (router) + `components/generator/{landing,builder,variant-detail}-view.tsx`. Differential vs original page: identical HTML in 7 store states. Navigation tests added. Copy finding for phase 4: landing says "Powered by AI" and metadata says "con IA", but nothing uses AI.
+- L15 (2026-11-13) User: "dale" (push/merge phase 3, start phase 4). PR #4 merged (05aa280).
+- L16 (2026-11-13) User: "también veo que el generaador puede mejorar, ya que no genera combinaciones de cuadrantes que llenen todo el espacio disponible para el dashboard, revisa eso también". Measured: 51/169 layout×count pairs at 100% utilization (Grid min 33%). Added `fillEmptySpace` (balanced row bands + neighbour growth); now 169/169 at 100%, no overlaps, no new narrow or tall cards. Removed the generator fallback that swapped layouts below 60% utilization (unreachable now).
