@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { BuilderView } from "@/components/generator/builder-view"
 import { LandingView } from "@/components/generator/landing-view"
 import { VariantDetailView } from "@/components/generator/variant-detail-view"
@@ -10,6 +10,7 @@ import { downloadJson } from "@/lib/browser/download"
 import { readFileText } from "@/lib/browser/read-file"
 import { buildExport, exportFileName, parseImport, type ImportError } from "@/lib/domain/dashboard-transfer"
 import type { SavedDashboard } from "@/lib/domain/saved-dashboards"
+import { buildShareUrl, decodeShare, encodeShare, readShareFromHash } from "@/lib/domain/share-link"
 import { useDashboardInfo, useDashboardStore, useLayouts } from "@/store"
 
 const IMPORT_ERRORS: Record<ImportError, string> = {
@@ -35,7 +36,45 @@ export default function DashboardGenerator() {
   const renameDashboard = useDashboardStore((state) => state.renameDashboard)
   const deleteDashboard = useDashboardStore((state) => state.deleteDashboard)
   const importDashboards = useDashboardStore((state) => state.importDashboards)
+  const openSharedDashboard = useDashboardStore((state) => state.openSharedDashboard)
   const { toast } = useToast()
+  const [manualShareLink, setManualShareLink] = useState<string | null>(null)
+
+  // Opening a share link (#share=...) creates a new dashboard; the fragment is removed so a reload does not repeat it.
+  useEffect(() => {
+    const encoded = readShareFromHash(window.location.hash)
+    if (encoded === null) return
+    window.history.replaceState(null, "", window.location.pathname + window.location.search)
+    void decodeShare(encoded).then((shared) => {
+      if (!shared) {
+        toast({ title: "No se pudo abrir el link", description: "El link para compartir no es válido o está incompleto.", variant: "destructive" })
+        return
+      }
+      openSharedDashboard(shared)
+      toast({ title: "Dashboard compartido", description: "Se abrió un dashboard compartido. Ya está guardado en tus dashboards." })
+    })
+  }, [openSharedDashboard, toast])
+
+  const handleShare = useCallback(async () => {
+    const state = useDashboardStore.getState()
+    if (!state.selectedVariant) return
+    const encoded = await encodeShare({
+      title: state.dashboardTitle,
+      description: state.dashboardDescription,
+      variables: state.variables,
+      excludedCombinations: state.excludedCombinations,
+      variant: state.selectedVariant,
+    })
+    const url = buildShareUrl(window.location.href, encoded)
+    try {
+      if (!navigator.clipboard) throw new Error("clipboard unavailable")
+      await navigator.clipboard.writeText(url)
+      setManualShareLink(null)
+      toast({ title: "Link copiado", description: "Link copiado. Quien lo abra verá este layout." })
+    } catch {
+      setManualShareLink(url)
+    }
+  }, [toast])
 
   const exportDashboards = useCallback((dashboards: SavedDashboard[]) => {
     downloadJson(exportFileName(dashboards), buildExport(dashboards))
@@ -62,6 +101,7 @@ export default function DashboardGenerator() {
   )
 
   const handleBackToVariants = useCallback(() => {
+    setManualShareLink(null)
     setSelectedVariant(null)
   }, [setSelectedVariant])
 
@@ -99,6 +139,8 @@ export default function DashboardGenerator() {
           onBack={handleBackToVariants}
           onStartOver={startNewDashboard}
           onRegeneratePalette={() => regenerateVariantPalette(selectedVariant.id)}
+          onShare={handleShare}
+          manualShareLink={manualShareLink}
         />
       </main>
     )
