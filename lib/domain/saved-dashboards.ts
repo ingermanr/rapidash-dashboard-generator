@@ -151,3 +151,25 @@ export function migratePersistedState(
   )
   return { ...base, savedDashboards: saved, activeDashboardId: activeId }
 }
+
+/** Same dashboards with the same content, in any order. */
+export function sameDashboardList(a: SavedDashboard[], b: SavedDashboard[]): boolean {
+  if (a.length !== b.length) return false
+  const key = (list: SavedDashboard[]) => JSON.stringify([...list].sort((x, y) => x.id.localeCompare(y.id)))
+  return key(a) === key(b)
+}
+
+/**
+ * List to adopt when another tab wrote `incoming`. That tab's version of each dashboard wins (last writer wins);
+ * the dashboard open here is added back only when the other tab does not have it, so tabs converge instead of
+ * re-saving each other's writes forever.
+ */
+export function mergeFromOtherTab(
+  incoming: SavedDashboard[],
+  activeId: string | null,
+  workspace: DashboardWorkspace,
+  deps: SavedDashboardDeps = defaultSavedDashboardDeps,
+): SavedDashboard[] {
+  if (activeId === null || incoming.some((d) => d.id === activeId)) return incoming
+  return upsertSavedDashboard(incoming, activeId, workspace, deps).saved
+}

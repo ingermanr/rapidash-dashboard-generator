@@ -5,8 +5,10 @@ import { regeneratePalette } from '@/lib/domain/palettes'
 import {
   PERSISTED_STATE_VERSION,
   deleteSavedDashboard,
+  mergeFromOtherTab,
   migratePersistedState,
   renameSavedDashboard,
+  sameDashboardList,
   upsertSavedDashboard,
   type DashboardWorkspace,
   type SavedDashboard,
@@ -268,7 +270,7 @@ useDashboardStore.subscribe((state, previous) => {
   }
 })
 
-// Another tab saved: adopt its list (it may hold dashboards created there) and keep this tab's open dashboard in it.
+// Another tab saved: adopt its list (it may hold dashboards created there); keep this tab's open dashboard if it is missing.
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
     if (event.key !== 'dashboard-storage' || !event.newValue) return
@@ -281,7 +283,9 @@ if (typeof window !== 'undefined') {
       return
     }
     const state = useDashboardStore.getState()
-    const { saved, activeId } = upsertSavedDashboard(incoming, state.activeDashboardId, workspaceOf(state))
-    useDashboardStore.setState({ savedDashboards: saved, activeDashboardId: activeId })
+    const merged = mergeFromOtherTab(incoming, state.activeDashboardId, workspaceOf(state))
+    // Writing only on a real difference stops two tabs from echoing each other's writes.
+    if (sameDashboardList(merged, state.savedDashboards)) return
+    useDashboardStore.setState({ savedDashboards: merged })
   })
 }

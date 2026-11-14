@@ -146,6 +146,46 @@ describe('saved dashboards', () => {
     expect(stored.state.savedDashboards.map((d: { title: string }) => d.title).sort()).toEqual(['Esta pestaña', 'Otra pestaña'])
   })
 
+  it('does not write back when another tab echoes the same saved list (no ping-pong)', () => {
+    act(() => store().setDashboardTitle('Aquí'))
+    const current = store().savedDashboards
+    const echo = JSON.stringify({
+      version: 1,
+      state: { dashboardTitle: 'Otra cosa en la otra pestaña', savedDashboards: [...current].reverse(), activeDashboardId: 'x' },
+    })
+    const setItem = jest.spyOn(Storage.prototype, 'setItem')
+
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'dashboard-storage', newValue: echo, storageArea: localStorage }))
+    })
+
+    expect(setItem).not.toHaveBeenCalled()
+    expect(store().savedDashboards).toBe(current)
+    setItem.mockRestore()
+  })
+
+  it('adopts the other tab version of the dashboard open here without re-saving it (lists converge)', () => {
+    act(() => store().setDashboardTitle('Versión local'))
+    const id = store().activeDashboardId!
+    const theirs = { ...store().savedDashboards[0], title: 'Versión de la otra pestaña', updatedAt: 777 }
+    const newValue = JSON.stringify({ version: 1, state: { savedDashboards: [theirs], activeDashboardId: id } })
+
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'dashboard-storage', newValue, storageArea: localStorage }))
+    })
+
+    expect(store().savedDashboards).toEqual([theirs])
+    expect(store().dashboardTitle).toBe('Versión local')
+
+    // The write this tab just made echoes back unchanged: nothing more happens.
+    const setItem = jest.spyOn(Storage.prototype, 'setItem')
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'dashboard-storage', newValue, storageArea: localStorage }))
+    })
+    expect(setItem).not.toHaveBeenCalled()
+    setItem.mockRestore()
+  })
+
   it('ignores storage events for other keys or with unreadable data', () => {
     act(() => store().setDashboardTitle('Intacto'))
     const before = store().savedDashboards
