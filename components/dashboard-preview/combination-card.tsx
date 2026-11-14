@@ -75,11 +75,13 @@ export function CombinationCard({ combination, palette, index, size }: Combinati
 
         {/* Chart Container - Optimizado para escalado */}
         <div className="flex-1 min-h-0 w-full rounded-lg bg-gradient-to-br from-background/60 to-background/20 backdrop-blur-sm border border-border/30 overflow-hidden">
-          <div className={`w-full h-full ${
-            combination.chartType === "progress" || combination.chartType === "metric" 
-              ? "p-4" 
-              : "p-2"
-          }`}>
+          <div
+            role="img"
+            aria-label={`Gráfico de ejemplo: ${CHART_TYPE_LABELS[combination.chartType]} de ${combination.name}`}
+            className={`w-full h-full ${
+              combination.chartType === "progress" || combination.chartType === "metric" ? "p-4" : "p-2"
+            }`}
+          >
             {combination.chartType === "bar" && <BarChart color={color} combination={combination} size={size} />}
             {combination.chartType === "horizontal-bar" && (
               <HorizontalBarChart color={color} combination={combination} size={size} />

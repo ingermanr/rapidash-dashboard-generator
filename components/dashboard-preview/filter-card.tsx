@@ -31,7 +31,7 @@ export function FilterCard({
             <span className="text-xs font-semibold text-foreground">{variable.name}</span>
           </div>
           <Select value={value} onValueChange={onChange}>
-            <SelectTrigger className="w-full h-8 rounded-md border-border/50 bg-background/50 backdrop-blur-sm text-foreground hover:bg-background/70 hover:border-primary/30 transition-all duration-200 text-xs">
+            <SelectTrigger aria-label={`Filtrar por ${variable.name}`} className="w-full h-8 rounded-md border-border/50 bg-background/50 backdrop-blur-sm text-foreground hover:bg-background/70 hover:border-primary/30 transition-all duration-200 text-xs">
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>
             <SelectContent>
@@ -60,7 +60,7 @@ export function FilterCard({
             <span className="text-xs font-semibold text-foreground">{variable.name}</span>
           </div>
           <Select value={value} onValueChange={onChange}>
-            <SelectTrigger className="w-full h-8 rounded-md border-border/50 bg-background/50 backdrop-blur-sm text-foreground hover:bg-background/70 hover:border-primary/30 transition-all duration-200 text-xs">
+            <SelectTrigger aria-label={`Filtrar por ${variable.name}`} className="w-full h-8 rounded-md border-border/50 bg-background/50 backdrop-blur-sm text-foreground hover:bg-background/70 hover:border-primary/30 transition-all duration-200 text-xs">
               <SelectValue placeholder="Seleccionar período" />
             </SelectTrigger>
             <SelectContent>

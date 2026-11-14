@@ -346,7 +346,8 @@ export function VariableInput() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleRemoveVariable(variable.id)}
-                      className="h-8 w-8 p-0 text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                      aria-label={`Eliminar variable ${variable.name}`}
+                      className="h-8 w-8 p-0 text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
                     >
                       <X className="h-4 w-4" />
                     </Button>
