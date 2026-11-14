@@ -2,15 +2,18 @@
 
 import { Area, AreaChart as RechartsAreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useAxisTextColor } from "@/components/dashboard-preview/use-axis-text-color"
-import { generateLineData, randomFor } from "@/lib/domain/sample-data"
+import { generateLineData } from "@/lib/domain/sample-data"
 import type { VariableCombination } from "@/types/dashboard"
+import { usePreviewFilters } from "@/components/dashboard-preview/preview-filters"
+import { chartRandom, timePointsFor } from "@/lib/domain/filters"
 
 export function AreaChart({
   color,
   combination,
   size,
 }: { color: string; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generateLineData(combination, randomFor(combination.id))
+  const filters = usePreviewFilters()
+  const data = generateLineData(combination, chartRandom(combination.id, filters), timePointsFor(combination, filters))
   const fontSize = size === "large" ? 13 : size === "medium" ? 11 : 9
   const strokeWidth = size === "large" ? 3 : 2
   const margin =

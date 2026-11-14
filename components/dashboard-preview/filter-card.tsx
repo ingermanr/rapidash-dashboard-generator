@@ -70,7 +70,6 @@ export function FilterCard({
               <SelectItem value="last-3-months">Últimos 3 meses</SelectItem>
               <SelectItem value="last-6-months">Últimos 6 meses</SelectItem>
               <SelectItem value="last-year">Último año</SelectItem>
-              <SelectItem value="custom">Personalizado</SelectItem>
             </SelectContent>
           </Select>
         </div>

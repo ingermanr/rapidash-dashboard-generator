@@ -1,10 +1,13 @@
 "use client"
 
 import { TrendingUp } from "lucide-react"
-import { generateMetricValue, randomFor } from "@/lib/domain/sample-data"
+import { generateMetricValue } from "@/lib/domain/sample-data"
+import { usePreviewFilters } from "@/components/dashboard-preview/preview-filters"
+import { chartRandom } from "@/lib/domain/filters"
 
 export function MetricDisplay({ color, name, size, seedKey }: { color: string; name: string; size: "small" | "medium" | "large"; seedKey: string }) {
-  const { value, change } = generateMetricValue(randomFor(seedKey))
+  const filters = usePreviewFilters()
+  const { value, change } = generateMetricValue(chartRandom(seedKey, filters))
   const isPositive = Number.parseFloat(change) > 0
   
   const textSize = size === "large" ? "text-4xl" : size === "medium" ? "text-3xl" : "text-2xl"

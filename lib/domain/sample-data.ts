@@ -203,8 +203,11 @@ export function generateBarData(combination: VariableCombination, random: Random
   }))
 }
 
-export function generateLineData(combination: VariableCombination, random: RandomSource) {
-  const timePoints = getTimePointsFromCombination(combination)
+export function generateLineData(
+  combination: VariableCombination,
+  random: RandomSource,
+  timePoints: string[] = getTimePointsFromCombination(combination),
+) {
   return timePoints.map((point) => ({
     name: point,
     value: Math.floor(random() * 5000) + 1000,

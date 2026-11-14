@@ -2,15 +2,18 @@
 
 import { Bar, BarChart as RechartsBarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useAxisTextColor } from "@/components/dashboard-preview/use-axis-text-color"
-import { generateBarData, randomFor } from "@/lib/domain/sample-data"
+import { generateBarData } from "@/lib/domain/sample-data"
 import type { VariableCombination } from "@/types/dashboard"
+import { usePreviewFilters } from "@/components/dashboard-preview/preview-filters"
+import { chartRandom, filterChartData } from "@/lib/domain/filters"
 
 export function HorizontalBarChart({
   color,
   combination,
   size,
 }: { color: string; combination: VariableCombination; size: "small" | "medium" | "large" }) {
-  const data = generateBarData(combination, randomFor(combination.id))
+  const filters = usePreviewFilters()
+  const data = filterChartData(generateBarData(combination, chartRandom(combination.id, filters)), combination, filters)
   const fontSize = size === "large" ? 13 : size === "medium" ? 12 : 10
   const barSize = size === "large" ? undefined : size === "medium" ? 25 : 18
   const margin =

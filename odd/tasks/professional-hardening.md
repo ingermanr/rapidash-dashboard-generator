@@ -24,7 +24,7 @@ Delivery: ask-on-risk, work-unit commits. Test runner: `npx jest`; checks: `npx 
 - [x] T8a (S4) Remove inaccurate AI claims — inline — 1a7eb43
 - [x] T8b (S4) Layouts fill the whole grid (`fillEmptySpace`) — inline
 - [x] T8c (S4) PDF diagram uses the layout engine — inline
-- [ ] T8d (S4) Filters affect the preview charts — inline
+- [x] T8d (S4) Filters affect the preview charts — inline
 - [ ] T8e (S4) Modern palettes, better color presentation, regenerate palette independently of the layout — inline
 
 Route evidence: phase 1 units are small and sequential; no writer trigger applies.
@@ -49,3 +49,4 @@ Route evidence: phase 1 units are small and sequential; no writer trigger applie
 - L16 (2026-11-13) User: "también veo que el generaador puede mejorar, ya que no genera combinaciones de cuadrantes que llenen todo el espacio disponible para el dashboard, revisa eso también". Measured: 51/169 layout×count pairs at 100% utilization (Grid min 33%). Added `fillEmptySpace` (balanced row bands + neighbour growth); now 169/169 at 100%, no overlaps, no new narrow or tall cards. Removed the generator fallback that swapped layouts below 60% utilization (unreachable now).
 - L17 T8c: PDF now uses `getRealLayoutDivisions`. Its hardcoded distribution was capped at 12 components and reused the last cell, overlapping boxes (RED with 13/15 components). Tests cover 5-30 components.
 - L18 (2026-11-13) User: "incluye también una revisión sobre las combinaciones de colores y como se muestran para que sean más modernos y se puedan volver a generar independietemente de la generación de la distribución de los cuadrantes"
+- L19 T8d: `lib/domain/filters.ts` + `PreviewFiltersProvider` context. Filters reseed sample data (unfiltered key unchanged, so unfiltered output is identical), narrow charts by the filtered dimension and set time points per period. Fixed "Todas" counting as active; removed no-op "Personalizado". Both UI tests RED on main components.
