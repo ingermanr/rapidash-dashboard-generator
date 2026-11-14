@@ -98,18 +98,21 @@ function sanitizePalette(value: unknown): ColorPalette | null {
   return palette
 }
 
-/** A variant is kept only whole: a missing combination would silently change its layout. */
+/** A variant is kept only whole: a missing combination or variable would silently change what it shows. */
 export function sanitizeVariant(value: unknown): LayoutVariant | null {
   if (!isObject(value) || !isNonEmptyString(value.id) || !isNonEmptyString(value.layout)) return null
   const palette = sanitizePalette(value.palette)
   if (!palette || !Array.isArray(value.combinations)) return null
   const combinations = listOf(value.combinations, sanitizeCombination)
   if (combinations.length !== value.combinations.length) return null
+  if (!Array.isArray(value.variables)) return null
+  const variables = listOf(value.variables, sanitizeVariable)
+  if (variables.length !== value.variables.length) return null
   return {
     id: value.id,
     layout: value.layout,
     palette,
-    variables: listOf(value.variables, sanitizeVariable),
+    variables,
     combinations,
     layoutDescription: text(value.layoutDescription),
   }

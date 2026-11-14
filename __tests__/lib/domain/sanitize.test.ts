@@ -71,3 +71,22 @@ describe('sanitize', () => {
     }
   })
 })
+
+describe('sanitize contract guards', () => {
+  it('drops a variant whose variables are not all valid (variants are kept only whole)', () => {
+    const broken = { ...stored(variant), variables: [...stored(variant).variables, { id: 'x', name: 'Sin tipo' }] }
+    expect(sanitizeVariant(broken)).toBeNull()
+  })
+
+  it('keeps every field the store persists, so a new persisted field cannot be dropped on load', () => {
+    const { useDashboardStore } = jest.requireActual('@/store') as typeof import('@/store')
+    const partialize = useDashboardStore.persist.getOptions().partialize!
+    const persistedKeys = Object.keys(partialize(useDashboardStore.getState()) as object).sort()
+    expect(Object.keys(sanitizePersistedState({})).sort()).toEqual(persistedKeys)
+  })
+
+  it('keeps every field of a variable, so a new Variable field cannot be dropped on load', () => {
+    const full: Required<Variable> = { id: 'a', name: 'A', type: 'numeric', priority: 'alta' }
+    expect(Object.keys(sanitizeVariable(full)!).sort()).toEqual(Object.keys(full).sort())
+  })
+})
