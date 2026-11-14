@@ -1,3 +1,4 @@
+import { getRealLayoutDivisions } from "@/lib/layout-engine"
 import type { LayoutVariant } from "@/types/dashboard"
 
 export interface DashboardSpecPdfInput {
@@ -480,157 +481,9 @@ export async function exportDashboardSpecPdf({
   const layoutName = userLayout.charAt(0).toUpperCase() + userLayout.slice(1)
   doc.text(`Layout: ${layoutName} (${combinations.length} componentes)`, gridX, gridY - 10)
 
-  // PDF-only hardcoded distribution. It does NOT use the layout engine, so the PDF diagram
-  // can differ from the on-screen preview (tracked for phase 4).
-  const getPdfLayoutDivisions = (layout: string, numCombinations: number) => {
-    // Distribuciones optimizadas que reflejan mejor los layouts reales
-    const numComps = Math.min(numCombinations, 12)
-    
-    switch (layout.toLowerCase()) {
-      case 'grid':
-        // Grid uniforme - distribución equitativa
-        if (numComps <= 1) return [{ x: 0, y: 0, w: 12, h: 1 }]
-        if (numComps === 2) return [
-          { x: 0, y: 0, w: 6, h: 1 },
-          { x: 6, y: 0, w: 6, h: 1 }
-        ]
-        if (numComps <= 3) return [
-          { x: 0, y: 0, w: 4, h: 1 },
-          { x: 4, y: 0, w: 4, h: 1 },
-          { x: 8, y: 0, w: 4, h: 1 }
-        ]
-        if (numComps <= 4) return [
-          { x: 0, y: 0, w: 6, h: 1 },
-          { x: 6, y: 0, w: 6, h: 1 },
-          { x: 0, y: 1, w: 6, h: 1 },
-          { x: 6, y: 1, w: 6, h: 1 }
-        ]
-        if (numComps <= 6) return [
-          { x: 0, y: 0, w: 4, h: 1 }, { x: 4, y: 0, w: 4, h: 1 }, { x: 8, y: 0, w: 4, h: 1 },
-          { x: 0, y: 1, w: 4, h: 1 }, { x: 4, y: 1, w: 4, h: 1 }, { x: 8, y: 1, w: 4, h: 1 }
-        ].slice(0, numComps)
-        // Más de 6 componentes en grid 4x3
-        const cols = 4
-        const colWidth = 12 / cols
-        return Array.from({ length: numComps }, (_, i) => ({
-          x: (i % cols) * colWidth,
-          y: Math.floor(i / cols),
-          w: colWidth,
-          h: 1
-        }))
-
-      case 'masonry':
-        // Layout masonry - tamaños irregulares como cascada
-        if (numComps <= 1) return [{ x: 0, y: 0, w: 12, h: 1 }]
-        if (numComps === 2) return [
-          { x: 0, y: 0, w: 8, h: 1 },   // Componente ancho
-          { x: 8, y: 0, w: 4, h: 1 }    // Componente estrecho
-        ]
-        if (numComps <= 3) return [
-          { x: 0, y: 0, w: 6, h: 1 },   // Mediano
-          { x: 6, y: 0, w: 3, h: 1 },   // Pequeño
-          { x: 9, y: 0, w: 3, h: 1 }    // Pequeño
-        ]
-        // Patrón masonry típico con variedad de tamaños
-        const masonryPattern = [
-          { x: 0, y: 0, w: 6, h: 1 },   // Grande izq
-          { x: 6, y: 0, w: 3, h: 1 },   // Peq der arriba
-          { x: 9, y: 0, w: 3, h: 1 },   // Peq der arriba
-          { x: 0, y: 1, w: 4, h: 1 },   // Med izq abajo
-          { x: 4, y: 1, w: 8, h: 1 },   // Ancho abajo
-          { x: 0, y: 2, w: 3, h: 1 },   // Peq
-          { x: 3, y: 2, w: 3, h: 1 },   // Peq
-          { x: 6, y: 2, w: 6, h: 1 },   // Med
-          ...Array.from({ length: Math.max(0, numComps - 8) }, (_, i) => ({
-            x: (i % 4) * 3,
-            y: 3 + Math.floor(i / 4),
-            w: 3,
-            h: 1
-          }))
-        ]
-        return masonryPattern.slice(0, numComps)
-
-      case 'dashboard':
-        // Layout dashboard - header + métricas + gráficos
-        if (numComps <= 1) return [{ x: 0, y: 0, w: 12, h: 1 }]
-        if (numComps === 2) return [
-          { x: 0, y: 0, w: 12, h: 1 }, // Header completo
-          { x: 0, y: 1, w: 12, h: 1 }  // Contenido completo
-        ]
-        return [
-          { x: 0, y: 0, w: 12, h: 1 }, // Header principal
-          ...Array.from({ length: numComps - 1 }, (_, i) => {
-            if (i < 3) {
-              // Primeros 3 como métricas (4 columnas cada uno)
-              return { x: i * 4, y: 1, w: 4, h: 1 }
-            } else {
-              // Resto como gráficos (6 columnas cada uno)
-              const idx = i - 3
-              return { 
-                x: (idx % 2) * 6, 
-                y: 2 + Math.floor(idx / 2), 
-                w: 6, 
-                h: 1 
-              }
-            }
-          })
-        ]
-
-      case 'sidebar':
-      case 'left-sidebar':
-        // Layout con sidebar izquierdo fijo
-        if (numComps <= 1) return [{ x: 0, y: 0, w: 12, h: 1 }]
-        return [
-          { x: 0, y: 0, w: 3, h: 3 }, // Sidebar izquierdo alto
-          ...Array.from({ length: numComps - 1 }, (_, i) => ({
-            x: 3 + (i % 3) * 3,
-            y: Math.floor(i / 3),
-            w: 3,
-            h: 1
-          }))
-        ]
-
-      case 'right-sidebar':
-        // Layout con sidebar derecho
-        if (numComps <= 1) return [{ x: 0, y: 0, w: 12, h: 1 }]
-        return [
-          { x: 9, y: 0, w: 3, h: 3 }, // Sidebar derecho alto
-          ...Array.from({ length: numComps - 1 }, (_, i) => ({
-            x: (i % 3) * 3,
-            y: Math.floor(i / 3),
-            w: 3,
-            h: 1
-          }))
-        ]
-
-      case 'kanban':
-        // Layout kanban - columnas verticales
-        if (numComps <= 1) return [{ x: 0, y: 0, w: 12, h: 1 }]
-        const kanbanCols = Math.min(numComps, 4)
-        const kanbanColWidth = 12 / kanbanCols
-        return Array.from({ length: numComps }, (_, i) => ({
-          x: (i % kanbanCols) * kanbanColWidth,
-          y: Math.floor(i / kanbanCols),
-          w: kanbanColWidth,
-          h: 1
-        }))
-
-      default:
-        // Layout por defecto - grid simple
-        const defaultCols = numComps <= 2 ? 2 : 3
-        const defaultColWidth = 12 / defaultCols
-        return Array.from({ length: numComps }, (_, i) => ({
-          x: (i % defaultCols) * defaultColWidth,
-          y: Math.floor(i / defaultCols),
-          w: defaultColWidth,
-          h: 1
-        }))
-    }
-  }
-
-  type LayoutDivision = { x: number; y: number; w: number; h: number }
-  // Obtener las divisiones usando el layout exacto seleccionado por el usuario
-  const divisions: LayoutDivision[] = getPdfLayoutDivisions(userLayout, combinations.length)
+  // Same divisions as the on-screen preview, from the layout engine
+  const divisions = getRealLayoutDivisions(userLayout, combinations.length).map((d) => ({ x: d.x, y: d.y, w: d.width, h: d.height }))
+  type LayoutDivision = (typeof divisions)[number]
   const maxRows = Math.max(...divisions.map((d: LayoutDivision) => d.y + d.h))
   const gridColWidth = gridWidth / 12 // Ancho de columna ULTRA pequeño (120/12 = 10pt por columna)
   const cellRowHeight = Math.min(25, gridHeight / Math.max(maxRows, 3)) // Altura también reducida
@@ -661,14 +514,9 @@ export async function exportDashboardSpecPdf({
     }
   }
 
-  // Verificar que las divisiones coincidan con el número de componentes del usuario
-  if (divisions.length !== combinations.length) {
-    console.warn(`Layout mismatch: ${divisions.length} divisions vs ${combinations.length} components for layout "${userLayout}"`)
-  }
-
   // Renderizar cada componente según su división real - SIEMPRE el mismo número que seleccionó el usuario
   combinations.forEach((chart, index) => {
-    const division = divisions[index] || divisions[divisions.length - 1] // Usar la última división como fallback
+    const division = divisions[index]
     if (!division) return
 
     const x = gridX + (division.x * gridColWidth)
