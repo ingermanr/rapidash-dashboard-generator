@@ -68,7 +68,7 @@ export default function DashboardGenerator() {
       addToHistory(newVariant)
       setIsGenerating(false)
     }, 800)
-  }, [variables, generationHistory, setIsGenerating, setCurrentVariant, addToHistory])
+  }, [variables, generationHistory, excludedCombinations, setIsGenerating, setCurrentVariant, addToHistory])
 
   const deleteVariant = useCallback((variantId: string) => {
     removeFromHistory(variantId)
@@ -1253,14 +1253,6 @@ function generateSingleLayoutVariant(variables: Variable[], history: LayoutVaria
       : palettes[Math.floor(Math.random() * palettes.length)]
   }
 
-  // Debug: Log layout selection rationale (only in development)
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🎯 Layout Selection for ${combinationCount} combinations:`)
-    console.log(`   Available layouts: [${suitableLayouts.join(', ')}]`)
-    console.log(`   Selected: ${layout}`)
-    console.log(`   Rationale: ${getLayoutDescription(layout, combinations.length)}`)
-  }
-
   // Validación y optimización del layout seleccionado
   const divisions = getRealLayoutDivisions(layout, combinations.length)
   const quality = analyzeLayoutQuality(divisions)
@@ -1275,9 +1267,6 @@ function generateSingleLayoutVariant(variables: Variable[], history: LayoutVaria
       
       if (altQuality.spaceUtilization > quality.spaceUtilization + 15) {
         layout = alternativeLayout
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`🔧 Layout optimizado: ${layout} (aprovechamiento: ${altQuality.spaceUtilization}%)`)
-        }
         break
       }
     }

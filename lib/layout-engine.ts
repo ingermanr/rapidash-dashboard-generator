@@ -1,4 +1,3 @@
-import type { VariableCombination } from "@/types/dashboard"
 
 /**
  * Layout Division - Representa la posición y tamaño de un componente en el grid

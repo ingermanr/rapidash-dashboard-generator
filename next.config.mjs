@@ -1,11 +1,10 @@
+import { dirname } from "node:path"
+import { fileURLToPath } from "node:url"
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: false, // ✅ ESLint habilitado
-  },
-  typescript: {
-    ignoreBuildErrors: false,  // ✅ TypeScript validación habilitada
-  },
+  // Pin the workspace root so a stray lockfile in a parent directory is ignored.
+  outputFileTracingRoot: dirname(fileURLToPath(import.meta.url)),
   images: {
     unoptimized: true,
   },

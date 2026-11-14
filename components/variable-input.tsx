@@ -6,18 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, X, BarChart3, Calendar, Tag, Hash, Type, TrendingUp, ToggleLeft, AlertCircle, EyeOff, Eye } from "lucide-react"
+import { Plus, X, BarChart3, Calendar, Tag, Hash, Type, TrendingUp, ToggleLeft, AlertCircle, EyeOff, Eye, type LucideIcon } from "lucide-react"
 import type { Variable, VariableType, VariablePriority } from "@/types/dashboard"
 import { useVariables } from "@/store"
-
-interface VariableInputProps {
-  // Ya no necesitamos props, todo viene del store
-}
 
 const MIN_VARIABLE_NAME_LENGTH = 2
 const MAX_VARIABLE_NAME_LENGTH = 50
 
-const variableTypes: { value: VariableType; label: string; icon: any }[] = [
+const variableTypes: { value: VariableType; label: string; icon: LucideIcon }[] = [
   { value: "numeric", label: "Numérico", icon: Hash },
   { value: "categorical", label: "Categórico", icon: Tag },
   { value: "temporal", label: "Temporal", icon: Calendar },
@@ -33,7 +29,7 @@ const priorityOptions: { value: VariablePriority; label: string; color: string }
   { value: "baja", label: "Baja Importancia", color: "text-green-600" },
 ]
 
-export function VariableInput(props: VariableInputProps) {
+export function VariableInput() {
   // Usar el hook del store en lugar de props
   const { 
     variables, 
@@ -41,7 +37,6 @@ export function VariableInput(props: VariableInputProps) {
     removeVariable: removeVariableFromStore, 
     variableExists,
     getPriorityStats,
-    excludedCombinations,
     addExcludedCombination,
     removeExcludedCombination,
     isCombinationExcluded

@@ -39,7 +39,7 @@ const initialState = {
 
 export const useUIStore = create<UIState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
       
       setTheme: (theme) => set({ theme }),
