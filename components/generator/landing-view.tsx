@@ -14,10 +14,22 @@ export interface LandingViewProps {
   onOpenDashboard: (id: string) => void
   onRenameDashboard: (id: string, title: string) => void
   onDeleteDashboard: (id: string) => void
+  onExportDashboard: (id: string) => void
+  onExportAllDashboards: () => void
+  onImportDashboards: (file: File) => void
 }
 
 /** Marketing landing shown before the user starts building a dashboard. */
-export function LandingView({ onStart, savedDashboards, onOpenDashboard, onRenameDashboard, onDeleteDashboard }: LandingViewProps) {
+export function LandingView({
+  onStart,
+  savedDashboards,
+  onOpenDashboard,
+  onRenameDashboard,
+  onDeleteDashboard,
+  onExportDashboard,
+  onExportAllDashboards,
+  onImportDashboards,
+}: LandingViewProps) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-background to-muted/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Dynamic tech grid pattern */}
@@ -82,6 +94,9 @@ export function LandingView({ onStart, savedDashboards, onOpenDashboard, onRenam
             onOpen={onOpenDashboard}
             onRename={onRenameDashboard}
             onDelete={onDeleteDashboard}
+            onExport={onExportDashboard}
+            onExportAll={onExportAllDashboards}
+            onImport={onImportDashboards}
           />
 
           {/* Features Grid */}

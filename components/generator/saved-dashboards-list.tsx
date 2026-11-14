@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Check, FolderOpen, Pencil, Trash2, X } from "lucide-react"
+import { useRef, useState } from "react"
+import { Check, Download, FolderOpen, Pencil, Trash2, Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,35 +12,82 @@ export interface SavedDashboardsListProps {
   onOpen: (id: string) => void
   onRename: (id: string, title: string) => void
   onDelete: (id: string) => void
+  onExport: (id: string) => void
+  onExportAll: () => void
+  onImport: (file: File) => void
 }
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
 const dateFormat = new Intl.DateTimeFormat("es", { dateStyle: "medium", timeStyle: "short" })
 
-/** Dashboards stored in this browser, most recently edited first. Renders nothing when there are none. */
-export function SavedDashboardsList({ dashboards, onOpen, onRename, onDelete }: SavedDashboardsListProps) {
-  if (dashboards.length === 0) return null
+/**
+ * Dashboards stored in this browser, most recently edited first, with export and import. The import stays
+ * available when nothing is saved yet, so work can be brought over from another browser.
+ */
+export function SavedDashboardsList({ dashboards, onOpen, onRename, onDelete, onExport, onExportAll, onImport }: SavedDashboardsListProps) {
+  const fileInput = useRef<HTMLInputElement>(null)
 
   return (
     <section aria-labelledby="saved-dashboards-heading" className="mb-20">
-      <h2 id="saved-dashboards-heading" className="mb-6 text-3xl font-bold text-foreground">
-        Tus dashboards
-      </h2>
-      <ul aria-label="Tus dashboards" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {sortByRecent(dashboards).map((dashboard) => (
-          <SavedDashboardItem key={dashboard.id} dashboard={dashboard} onOpen={onOpen} onRename={onRename} onDelete={onDelete} />
-        ))}
-      </ul>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h2 id="saved-dashboards-heading" className="text-3xl font-bold text-foreground">
+          Tus dashboards
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {dashboards.length > 0 && (
+            <Button variant="outline" size="sm" onClick={onExportAll}>
+              <Download className="h-4 w-4" />
+              Exportar todos
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()}>
+            <Upload className="h-4 w-4" />
+            Importar
+          </Button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept=".json,application/json"
+            aria-label="Importar dashboards"
+            tabIndex={-1}
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              // Reset so choosing the same file again still triggers a change.
+              event.target.value = ""
+              if (file) onImport(file)
+            }}
+          />
+        </div>
+      </div>
+      {dashboards.length === 0 ? (
+        <p className="text-muted-foreground">
+          Todavía no hay dashboards guardados en este navegador. Puedes importar un archivo exportado desde otro.
+        </p>
+      ) : (
+        <ul aria-label="Tus dashboards" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {sortByRecent(dashboards).map((dashboard) => (
+            <SavedDashboardItem
+              key={dashboard.id}
+              dashboard={dashboard}
+              onOpen={onOpen}
+              onRename={onRename}
+              onDelete={onDelete}
+              onExport={onExport}
+            />
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
 
-interface SavedDashboardItemProps extends Omit<SavedDashboardsListProps, "dashboards"> {
+interface SavedDashboardItemProps extends Pick<SavedDashboardsListProps, "onOpen" | "onRename" | "onDelete" | "onExport"> {
   dashboard: SavedDashboard
 }
 
-function SavedDashboardItem({ dashboard, onOpen, onRename, onDelete }: SavedDashboardItemProps) {
+function SavedDashboardItem({ dashboard, onOpen, onRename, onDelete, onExport }: SavedDashboardItemProps) {
   const [mode, setMode] = useState<"view" | "rename" | "confirm-delete">("view")
   const [draft, setDraft] = useState(dashboard.title)
   const title = displayTitle(dashboard)
@@ -116,6 +163,10 @@ function SavedDashboardItem({ dashboard, onOpen, onRename, onDelete }: SavedDash
               >
                 <Pencil className="h-4 w-4" />
                 Renombrar
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onExport(dashboard.id)} aria-label={`Exportar ${title}`}>
+                <Download className="h-4 w-4" />
+                Exportar
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setMode("confirm-delete")} aria-label={`Eliminar ${title}`}>
                 <Trash2 className="h-4 w-4" />
