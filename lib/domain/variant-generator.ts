@@ -17,8 +17,8 @@ const LAYOUT_REQUIREMENTS = {
   QUAD: 4,
   PENTA: 5,
   HEXA: 6,
-  LARGE_MIN: 7,
-  LARGE_MAX: 9,
+  LARGE_MIN: 11,
+  LARGE_MAX: 15,
 } as const
 
 export function getSuitableLayouts(combinationCount: number): string[] {

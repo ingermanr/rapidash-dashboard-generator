@@ -116,6 +116,16 @@ describe('getSuitableLayouts', () => {
   })
 })
 
+describe('getSuitableLayouts ranges', () => {
+  it.each([11, 12, 15])('uses the large-range layouts for %i combinations', (count) => {
+    expect(getSuitableLayouts(count)).toEqual(['Masonry', 'Column Flow', 'Staggered', 'Dashboard Grid', 'Focus Grid', 'Tile Grid'])
+  })
+
+  it('keeps the extreme layouts for 31 or more combinations', () => {
+    expect(getSuitableLayouts(31)).toEqual(['Ultra Dense Grid', 'Adaptive Flow', 'Dashboard Grid', 'Column Flow', 'Grid'])
+  })
+})
+
 describe('generateSingleLayoutVariant', () => {
   const vars = [variable('sales', 'numeric', 'alta'), variable('region', 'categorical'), variable('date', 'temporal')]
 
