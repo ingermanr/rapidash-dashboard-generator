@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Variable, LayoutVariant, ExcludedCombination } from '@/types/dashboard'
 import { regeneratePalette } from '@/lib/domain/palettes'
 import { createSafeStorage } from '@/lib/persistence/safe-storage'
+import { sanitizeSavedDashboards } from '@/lib/domain/sanitize'
 import { reportWrite } from './persistence-status'
 import {
   PERSISTED_STATE_VERSION,
@@ -10,6 +11,7 @@ import {
   mergeFromOtherTab,
   migratePersistedState,
   renameSavedDashboard,
+  repairPersistedState,
   sameDashboardList,
   upsertSavedDashboard,
   type DashboardWorkspace,
@@ -242,6 +244,9 @@ export const useDashboardStore = create<DashboardState>()(
       storage: createJSONStorage(() => createSafeStorage(() => localStorage, reportWrite)),
       version: PERSISTED_STATE_VERSION,
       migrate: (persisted, version) => migratePersistedState(persisted, version) as unknown as DashboardState,
+      // Same-version loads skip migrate, so storage is repaired here too before it reaches the components.
+      merge: (persisted, current) =>
+        persisted === undefined || persisted === null ? current : { ...current, ...repairPersistedState(persisted) },
       // Solo persistir datos importantes, no estados temporales
       partialize: (state) => ({
         dashboardTitle: state.dashboardTitle,
@@ -280,7 +285,7 @@ if (typeof window !== 'undefined') {
     try {
       const parsed = JSON.parse(event.newValue)
       if (parsed?.version !== PERSISTED_STATE_VERSION || !Array.isArray(parsed.state?.savedDashboards)) return
-      incoming = parsed.state.savedDashboards
+      incoming = sanitizeSavedDashboards(parsed.state.savedDashboards)
     } catch {
       return
     }
