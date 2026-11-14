@@ -3,13 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { VariableInput } from '@/components/variable-input'
 import type { Variable } from '@/types/dashboard'
 
-// Mock del hook useToast
-jest.mock('@/components/ui/use-toast', () => ({
-  useToast: () => ({
-    toast: jest.fn(),
-  }),
-}))
-
 // Mock del store
 const mockAddVariable = jest.fn()
 const mockRemoveVariable = jest.fn()
