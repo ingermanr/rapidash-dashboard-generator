@@ -3,7 +3,7 @@
 ## [Unreleased]
 
 ### Infraestructura
-- CI con GitHub Actions: typecheck, lint, tests y build en cada push a `main` y en cada PR.
+- Script `verify` (typecheck + lint + tests + build) como verificación local antes de cada PR. Se retiró el workflow de GitHub Actions porque la cuenta no puede ejecutar Actions.
 - Nuevos scripts `typecheck` y `verify`; `lint` usa ESLint directamente con `--max-warnings=0`.
 - ESLint migrado a flat config (`eslint.config.mjs`) con `next/core-web-vitals` y `next/typescript`.
 - npm como único gestor de paquetes (eliminado `pnpm-lock.yaml`).
