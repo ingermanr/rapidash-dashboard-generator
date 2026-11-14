@@ -5,13 +5,19 @@ import { ArrowRight, BarChart3, Layout, Palette, Sparkles, Zap } from "lucide-re
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { SavedDashboardsList } from "@/components/generator/saved-dashboards-list"
+import type { SavedDashboard } from "@/lib/domain/saved-dashboards"
 
 export interface LandingViewProps {
   onStart: () => void
+  savedDashboards: SavedDashboard[]
+  onOpenDashboard: (id: string) => void
+  onRenameDashboard: (id: string, title: string) => void
+  onDeleteDashboard: (id: string) => void
 }
 
 /** Marketing landing shown before the user starts building a dashboard. */
-export function LandingView({ onStart }: LandingViewProps) {
+export function LandingView({ onStart, savedDashboards, onOpenDashboard, onRenameDashboard, onDeleteDashboard }: LandingViewProps) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-background to-muted/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Dynamic tech grid pattern */}
@@ -70,6 +76,13 @@ export function LandingView({ onStart }: LandingViewProps) {
               </p>
             </div>
           </div>
+
+          <SavedDashboardsList
+            dashboards={savedDashboards}
+            onOpen={onOpenDashboard}
+            onRename={onRenameDashboard}
+            onDelete={onDeleteDashboard}
+          />
 
           {/* Features Grid */}
           <h2 className="sr-only">Características</h2>

@@ -2,6 +2,15 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Variable, LayoutVariant, ExcludedCombination } from '@/types/dashboard'
 import { regeneratePalette } from '@/lib/domain/palettes'
+import {
+  PERSISTED_STATE_VERSION,
+  deleteSavedDashboard,
+  migratePersistedState,
+  renameSavedDashboard,
+  upsertSavedDashboard,
+  type DashboardWorkspace,
+  type SavedDashboard,
+} from '@/lib/domain/saved-dashboards'
 
 export interface DashboardState {
   // Estado del dashboard
@@ -18,6 +27,10 @@ export interface DashboardState {
   generationHistory: LayoutVariant[]
   selectedVariant: LayoutVariant | null
   isGenerating: boolean
+
+  // Dashboards guardados (el workspace de arriba se autoguarda en el activo)
+  savedDashboards: SavedDashboard[]
+  activeDashboardId: string | null
   
   // Acciones para el dashboard
   setDashboardTitle: (title: string) => void
@@ -46,6 +59,12 @@ export interface DashboardState {
   setIsGenerating: (generating: boolean) => void
   clearHistory: () => void
   
+  // Acciones para dashboards guardados
+  startNewDashboard: () => void
+  openDashboard: (id: string) => void
+  renameDashboard: (id: string, title: string) => void
+  deleteDashboard: (id: string) => void
+
   // Utilidades
   reset: () => void
 }
@@ -60,7 +79,27 @@ const initialState = {
   generationHistory: [],
   selectedVariant: null,
   isGenerating: false,
+  savedDashboards: [] as SavedDashboard[],
+  activeDashboardId: null as string | null,
 }
+
+const emptyWorkspace = {
+  dashboardTitle: '',
+  dashboardDescription: '',
+  variables: [],
+  excludedCombinations: [],
+  generationHistory: [],
+  currentVariant: null,
+  selectedVariant: null,
+}
+
+const workspaceOf = (state: DashboardState): DashboardWorkspace => ({
+  title: state.dashboardTitle,
+  description: state.dashboardDescription,
+  variables: state.variables,
+  excludedCombinations: state.excludedCombinations,
+  generationHistory: state.generationHistory,
+})
 
 export const useDashboardStore = create<DashboardState>()(
   persist(
@@ -162,12 +201,43 @@ export const useDashboardStore = create<DashboardState>()(
         selectedVariant: null 
       }),
       
+      // Acciones para dashboards guardados
+      startNewDashboard: () => set({ ...emptyWorkspace, activeDashboardId: null, showLanding: false }),
+
+      openDashboard: (id) => set((state) => {
+        const dashboard = state.savedDashboards.find(d => d.id === id)
+        if (!dashboard) return {}
+        return {
+          activeDashboardId: dashboard.id,
+          dashboardTitle: dashboard.title,
+          dashboardDescription: dashboard.description,
+          variables: dashboard.variables,
+          excludedCombinations: dashboard.excludedCombinations,
+          generationHistory: dashboard.generationHistory,
+          currentVariant: dashboard.generationHistory[dashboard.generationHistory.length - 1] ?? null,
+          selectedVariant: null,
+          showLanding: false,
+        }
+      }),
+
+      renameDashboard: (id, title) => set((state) => ({
+        savedDashboards: renameSavedDashboard(state.savedDashboards, id, title),
+        ...(state.activeDashboardId === id ? { dashboardTitle: title.trim() } : {}),
+      })),
+
+      deleteDashboard: (id) => set((state) => ({
+        savedDashboards: deleteSavedDashboard(state.savedDashboards, id),
+        ...(state.activeDashboardId === id ? { ...emptyWorkspace, activeDashboardId: null } : {}),
+      })),
+
       // Utilidades
       reset: () => set(initialState),
     }),
     {
       name: 'dashboard-storage',
       storage: createJSONStorage(() => localStorage),
+      version: PERSISTED_STATE_VERSION,
+      migrate: (persisted, version) => migratePersistedState(persisted, version) as unknown as DashboardState,
       // Solo persistir datos importantes, no estados temporales
       partialize: (state) => ({
         dashboardTitle: state.dashboardTitle,
@@ -176,7 +246,24 @@ export const useDashboardStore = create<DashboardState>()(
         excludedCombinations: state.excludedCombinations,
         generationHistory: state.generationHistory,
         selectedVariant: state.selectedVariant,
+        savedDashboards: state.savedDashboards,
+        activeDashboardId: state.activeDashboardId,
       }),
     }
   )
 )
+
+// Autosave: every change to the workspace is copied into the active saved dashboard.
+useDashboardStore.subscribe((state, previous) => {
+  const changed =
+    state.dashboardTitle !== previous.dashboardTitle ||
+    state.dashboardDescription !== previous.dashboardDescription ||
+    state.variables !== previous.variables ||
+    state.excludedCombinations !== previous.excludedCombinations ||
+    state.generationHistory !== previous.generationHistory
+  if (!changed) return
+  const { saved, activeId } = upsertSavedDashboard(state.savedDashboards, state.activeDashboardId, workspaceOf(state))
+  if (saved !== state.savedDashboards || activeId !== state.activeDashboardId) {
+    useDashboardStore.setState({ savedDashboards: saved, activeDashboardId: activeId })
+  }
+})

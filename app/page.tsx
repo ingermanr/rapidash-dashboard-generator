@@ -4,37 +4,36 @@ import { useCallback } from "react"
 import { BuilderView } from "@/components/generator/builder-view"
 import { LandingView } from "@/components/generator/landing-view"
 import { VariantDetailView } from "@/components/generator/variant-detail-view"
-import { useDashboardInfo, useLayouts, useVariables } from "@/store"
+import { useDashboardInfo, useDashboardStore, useLayouts } from "@/store"
 
 export default function DashboardGenerator() {
-  const { clearVariables } = useVariables()
-  const { selectedVariant, setSelectedVariant, clearHistory, regenerateVariantPalette } = useLayouts()
-  const {
-    dashboardTitle,
-    dashboardDescription,
-    showLanding,
-    setDashboardTitle,
-    setDashboardDescription,
-    setShowLanding,
-  } = useDashboardInfo()
-
-  const handleStartCreating = useCallback(() => {
-    // Limpiar todos los datos anteriores cuando se inicia una nueva sesión
-    clearVariables()
-    clearHistory()
-    setDashboardTitle('')
-    setDashboardDescription('')
-    setShowLanding(false)
-  }, [setShowLanding, clearVariables, clearHistory, setDashboardTitle, setDashboardDescription])
+  const { selectedVariant, setSelectedVariant, regenerateVariantPalette } = useLayouts()
+  const { dashboardTitle, dashboardDescription, showLanding, setShowLanding } = useDashboardInfo()
+  const savedDashboards = useDashboardStore((state) => state.savedDashboards)
+  const startNewDashboard = useDashboardStore((state) => state.startNewDashboard)
+  const openDashboard = useDashboardStore((state) => state.openDashboard)
+  const renameDashboard = useDashboardStore((state) => state.renameDashboard)
+  const deleteDashboard = useDashboardStore((state) => state.deleteDashboard)
 
   const handleBackToVariants = useCallback(() => {
     setSelectedVariant(null)
   }, [setSelectedVariant])
 
+  const handleShowDashboards = useCallback(() => {
+    setSelectedVariant(null)
+    setShowLanding(true)
+  }, [setSelectedVariant, setShowLanding])
+
   if (showLanding) {
     return (
       <main>
-        <LandingView onStart={handleStartCreating} />
+        <LandingView
+          onStart={startNewDashboard}
+          savedDashboards={savedDashboards}
+          onOpenDashboard={openDashboard}
+          onRenameDashboard={renameDashboard}
+          onDeleteDashboard={deleteDashboard}
+        />
       </main>
     )
   }
@@ -47,7 +46,7 @@ export default function DashboardGenerator() {
           title={dashboardTitle}
           description={dashboardDescription}
           onBack={handleBackToVariants}
-          onStartOver={handleStartCreating}
+          onStartOver={startNewDashboard}
           onRegeneratePalette={() => regenerateVariantPalette(selectedVariant.id)}
         />
       </main>
@@ -56,7 +55,7 @@ export default function DashboardGenerator() {
 
   return (
     <main>
-      <BuilderView onStartOver={handleStartCreating} />
+      <BuilderView onStartOver={startNewDashboard} onShowDashboards={handleShowDashboards} />
     </main>
   )
 }
