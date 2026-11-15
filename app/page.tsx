@@ -28,7 +28,7 @@ function importSummary(imported: number, discarded: number): string {
 }
 
 export default function DashboardGenerator() {
-  const { selectedVariant, setSelectedVariant, regenerateVariantPalette } = useLayouts()
+  const { selectedVariant, setSelectedVariant, regenerateVariantPalette, setVariantPalette } = useLayouts()
   const { dashboardTitle, dashboardDescription, showLanding, setShowLanding } = useDashboardInfo()
   const savedDashboards = useDashboardStore((state) => state.savedDashboards)
   const startNewDashboard = useDashboardStore((state) => state.startNewDashboard)
@@ -139,6 +139,7 @@ export default function DashboardGenerator() {
           onBack={handleBackToVariants}
           onStartOver={startNewDashboard}
           onRegeneratePalette={() => regenerateVariantPalette(selectedVariant.id)}
+          onApplyPalette={(palette) => setVariantPalette(selectedVariant.id, palette)}
           onShare={handleShare}
           manualShareLink={manualShareLink}
         />

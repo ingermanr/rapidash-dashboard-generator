@@ -60,6 +60,16 @@ describe('accessibility', () => {
     expect(await violations(container)).toEqual([])
   })
 
+  it('variant detail with the "Personalizar colores" panel open has no axe violations', async () => {
+    setState({ showLanding: false, variables, currentVariant: variant, generationHistory: [variant], selectedVariant: variant })
+    const { container } = render(<DashboardGenerator />)
+
+    await userEvent.click(screen.getByRole('button', { name: /Personalizar colores/ }))
+
+    expect(screen.getByRole('region', { name: 'Personalizar colores' })).toBeInTheDocument()
+    expect(await violations(container)).toEqual([])
+  })
+
   it('variant detail with the "Construir con IA" panel open has no axe violations', async () => {
     setState({ showLanding: false, variables, currentVariant: variant, generationHistory: [variant], selectedVariant: variant })
     const { container } = render(<DashboardGenerator />)

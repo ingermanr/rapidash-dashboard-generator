@@ -1,6 +1,7 @@
 "use client"
 
 import { Area, AreaChart as RechartsAreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { AXIS_FONT_SIZE, chartDensity, compactNumber, type ChartBox } from "@/components/dashboard-preview/charts/chart-scale"
 import { useAxisTextColor } from "@/components/dashboard-preview/use-axis-text-color"
 import { generateLineData } from "@/lib/domain/sample-data"
 import type { VariableCombination } from "@/types/dashboard"
@@ -11,13 +12,17 @@ export function AreaChart({
   color,
   combination,
   size,
-}: { color: string; combination: VariableCombination; size: "small" | "medium" | "large" }) {
+  box = { width: 0, height: 0 },
+}: { color: string; combination: VariableCombination; size: "small" | "medium" | "large"; box?: ChartBox }) {
   const filters = usePreviewFilters()
   const data = generateLineData(combination, chartRandom(combination.id, filters), timePointsFor(combination, filters))
-  const fontSize = size === "large" ? 13 : size === "medium" ? 11 : 9
+  const density = chartDensity(box)
+  const compact = density === "compact"
+  const fontSize = AXIS_FONT_SIZE[density]
   const strokeWidth = size === "large" ? 3 : 2
-  const margin =
-    size === "large"
+  const margin = compact
+    ? { top: 6, right: 8, left: 4, bottom: 0 }
+    : size === "large"
       ? { top: 10, right: 15, left: 15, bottom: 20 }
       : size === "medium"
         ? { top: 8, right: 12, left: 12, bottom: 15 }
@@ -31,6 +36,8 @@ export function AreaChart({
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
         <XAxis
           dataKey="name"
+          interval={compact ? "preserveStartEnd" : undefined}
+          minTickGap={compact ? 4 : 5}
           stroke={axisColor}
           fontSize={fontSize}
           tick={{ fill: axisColor, fontSize }}
@@ -45,7 +52,9 @@ export function AreaChart({
           axisLine={{ stroke: axisColor }}
           tickLine={{ stroke: axisColor }}
           tickMargin={5}
-          width={size === "small" ? 35 : 45}
+          width={density === "roomy" ? 40 : 32}
+          tickFormatter={compactNumber}
+          hide={compact}
         />
         <Tooltip
           contentStyle={{

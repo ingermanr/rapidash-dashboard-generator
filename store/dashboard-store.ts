@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
-import type { Variable, LayoutVariant, ExcludedCombination } from '@/types/dashboard'
+import type { Variable, LayoutVariant, ExcludedCombination, ColorPalette } from '@/types/dashboard'
 import { regeneratePalette } from '@/lib/domain/palettes'
 import { createSafeStorage } from '@/lib/persistence/safe-storage'
 import type { SharePayload } from '@/lib/domain/share-link'
@@ -62,6 +62,7 @@ export interface DashboardState {
   addToHistory: (variant: LayoutVariant) => void
   removeFromHistory: (variantId: string) => void
   regenerateVariantPalette: (variantId: string) => void
+  setVariantPalette: (variantId: string, palette: ColorPalette) => void
   setSelectedVariant: (variant: LayoutVariant | null) => void
   setIsGenerating: (generating: boolean) => void
   clearHistory: () => void
@@ -201,6 +202,16 @@ export const useDashboardStore = create<DashboardState>()(
         const replace = (v: LayoutVariant | null) => (v?.id === variantId ? updated : v)
         return {
           generationHistory: state.generationHistory.map(v => (v.id === variantId ? updated : v)),
+          currentVariant: replace(state.currentVariant),
+          selectedVariant: replace(state.selectedVariant),
+        }
+      }),
+
+      setVariantPalette: (variantId, palette) => set((state) => {
+        // Only the colours change; layout, combinations and id stay the same
+        const replace = (v: LayoutVariant | null) => (v?.id === variantId ? { ...v, palette } : v)
+        return {
+          generationHistory: state.generationHistory.map(v => (v.id === variantId ? { ...v, palette } : v)),
           currentVariant: replace(state.currentVariant),
           selectedVariant: replace(state.selectedVariant),
         }

@@ -1,6 +1,7 @@
 "use client"
 
 import { Bar, BarChart as RechartsBarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { AXIS_FONT_SIZE, categoryAxis, chartDensity, compactNumber, type ChartBox } from "@/components/dashboard-preview/charts/chart-scale"
 import { useAxisTextColor } from "@/components/dashboard-preview/use-axis-text-color"
 import { generateBarData } from "@/lib/domain/sample-data"
 import type { VariableCombination } from "@/types/dashboard"
@@ -11,18 +12,23 @@ export function HorizontalBarChart({
   color,
   combination,
   size,
-}: { color: string; combination: VariableCombination; size: "small" | "medium" | "large" }) {
+  box = { width: 0, height: 0 },
+}: { color: string; combination: VariableCombination; size: "small" | "medium" | "large"; box?: ChartBox }) {
   const filters = usePreviewFilters()
   const data = filterChartData(generateBarData(combination, chartRandom(combination.id, filters)), combination, filters)
-  const fontSize = size === "large" ? 13 : size === "medium" ? 12 : 10
+  const density = chartDensity(box)
+  const compact = density === "compact"
+  const fontSize = AXIS_FONT_SIZE[density]
   const barSize = size === "large" ? undefined : size === "medium" ? 25 : 18
-  const margin =
-    size === "large"
+  const margin = compact
+    ? { top: 4, right: 8, left: 0, bottom: 0 }
+    : size === "large"
       ? { top: 10, right: 30, left: 10, bottom: 10 }
       : size === "medium"
         ? { top: 5, right: 25, left: 5, bottom: 5 }
         : { top: 5, right: 20, left: 0, bottom: 5 }
-  const yAxisWidth = size === "large" ? 90 : size === "medium" ? 80 : 70
+  // The label column fits the longest category name, never more than 40% of the chart.
+  const labels = categoryAxis(data.map((d) => String(d.name)), fontSize, box.width || 300)
 
   const axisColor = useAxisTextColor()
 
@@ -34,11 +40,15 @@ export function HorizontalBarChart({
           type="number"
           stroke={axisColor}
           fontSize={fontSize}
-          tick={{ fill: axisColor, fontSize }}
-          axisLine={{ stroke: axisColor }}
-          tickLine={{ stroke: axisColor }}
           tickMargin={5}
           tickCount={size === "small" ? 3 : 5}
+          tickFormatter={compactNumber}
+          // Compact charts drop the value axis (the tooltip gives values). It collapses instead of using `hide`, which
+          // leaves the bars out of step with their category labels.
+          height={compact ? 1 : 30}
+          tick={compact ? false : { fill: axisColor, fontSize }}
+          axisLine={compact ? false : { stroke: axisColor }}
+          tickLine={compact ? false : { stroke: axisColor }}
         />
         <YAxis
           type="category"
@@ -48,7 +58,8 @@ export function HorizontalBarChart({
           tick={{ fill: axisColor, fontSize }}
           axisLine={{ stroke: axisColor }}
           tickLine={{ stroke: axisColor }}
-          width={yAxisWidth}
+          width={labels.width}
+          tickFormatter={labels.format}
           tickMargin={5}
           // Name every bar: Recharts would otherwise skip category labels when space is tight.
           interval={0}
