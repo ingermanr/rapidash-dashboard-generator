@@ -2,6 +2,7 @@
 
 import { useCallback } from "react"
 import { ArrowRight, BarChart3, FileText, Layout, Sparkles, FolderOpen } from "lucide-react"
+import { Logo } from "@/components/brand/logo"
 import { LayoutPreview } from "@/components/layout-preview"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -72,7 +73,7 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
           <div className="flex items-start justify-between">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-3 rounded-full border-2 border-primary/30 bg-gradient-to-r from-primary/15 to-chart-2/10 px-6 py-3 text-sm font-bold text-primary backdrop-blur-md shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30">
-                <Sparkles className="h-5 w-5 animate-soft-pulse" />
+                <Logo className="h-7 w-7" />
                 Diseño Automático de Dashboards
               </div>
               <div>

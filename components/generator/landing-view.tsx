@@ -2,6 +2,7 @@
 
 import { PALETTES } from "@/lib/domain/palettes"
 import { ArrowRight, BarChart3, Layout, Palette, Sparkles, Zap } from "lucide-react"
+import { Logo } from "@/components/brand/logo"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -59,7 +60,7 @@ export function LandingView({
           {/* Hero Section */}
           <div className="mb-20 text-center">
             <div className="mb-8 inline-flex items-center gap-3 rounded-full border-2 border-primary/30 bg-gradient-to-r from-primary/15 to-accent/10 px-8 py-3 text-sm font-bold text-primary backdrop-blur-md shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30 dark:border-primary/20 dark:from-primary/10 dark:to-accent/5 glass-effect animate-scale-in">
-              <Sparkles className="h-5 w-5 animate-soft-pulse" />
+              <Logo className="h-7 w-7" />
               Generación Automática
             </div>
             <h1 className="mb-8 text-balance text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
