@@ -1,413 +1,130 @@
-# 📊 Rapidash Dashboard Generator
+<p align="center">
+  <img src="assets/logo.svg" width="112" alt="Logo de Rapidash: un layout de dashboard con un gráfico de barras">
+</p>
 
-> **Generador inteligente de dashboards** con múltiples variantes de layouts, visualizaciones de datos y exportación a PDF.
-> 
-> *Creado con [v0 by Vercel](https://v0.dev)*
+<h1 align="center">Rapidash</h1>
 
-![Next.js](https://img.shields.io/badge/Next.js-15.5.7-black?logo=next.js)
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?logo=tailwind-css)
+<p align="center">
+  Generador de layouts de dashboards: define tus variables y obtén distribuciones,
+  gráficos y paletas listas para construir.
+</p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-0054ee" alt="Next.js 15">
+  <img src="https://img.shields.io/badge/React-19-0054ee" alt="React 19">
+  <img src="https://img.shields.io/badge/TypeScript-strict-0054ee" alt="TypeScript estricto">
+  <img src="https://img.shields.io/badge/datos-solo%20en%20tu%20navegador-0054ee" alt="Los datos quedan solo en tu navegador">
+  <img src="https://img.shields.io/badge/accesibilidad-WCAG%20AA-0054ee" alt="Accesibilidad WCAG AA">
+  <img src="https://img.shields.io/badge/licencia-MIT-0054ee" alt="Licencia MIT">
+</p>
 
-## ✨ Características
+<p align="center">
+  <a href="#qué-hace">Qué hace</a> ·
+  <a href="#instalación">Instalación</a> ·
+  <a href="#uso">Uso</a> ·
+  <a href="#guardar-y-compartir">Guardar y compartir</a> ·
+  <a href="#arquitectura">Arquitectura</a> ·
+  <a href="#roadmap">Roadmap</a>
+</p>
 
-### 🎨 **Interfaz Moderna**
-- **Diseño glassmorphism** con gradientes animados
-- **Tema dark/light** con persistencia de preferencias
-- **Animaciones fluidas** y transiciones suaves
-- **Responsive** - Adaptado para desktop, tablet y móvil
+<p align="center">
+  <img src="assets/cover.svg" alt="Un dashboard generado por Rapidash: cuatro KPIs, ventas por región en barras, tendencia mensual, ventas por canal en dona y ranking de productos, con la paleta Aurora">
+</p>
 
-### 📈 **Sistema de Variables**
-Soporta múltiples tipos de variables:
-- **Numérica** - Para valores cuantitativos
-- **Categórica** - Para clasificaciones
-- **Temporal** - Para series de tiempo
-- **Porcentaje** - Progreso o ratios
-- **Texto** - Datos cualitativos
-- **Binaria** - Valores booleanos
+## Qué hace
 
-### 🎯 **Motor de Layouts Inteligente**
-- **9+ patrones de layout** prediseñados
-- **Sistema de grid de 12 columnas**
-- **Generación aleatoria inteligente** sin duplicados
-- **Análisis de calidad** de layouts
-- **Exclusión de combinaciones** no deseadas
+Rapidash convierte una lista de variables en propuestas de dashboard. Cada propuesta, o **variante**, decide
+qué variables se combinan, con qué tipo de gráfico, en qué lugar de una grilla de 12 columnas y con qué paleta.
+El resultado se puede explorar, filtrar, exportar como especificación en PDF y compartir.
 
-#### Patrones de Layout Disponibles:
-- `Grid` - Grid simple de 3 columnas
-- `Hero + Grid` - Elemento destacado + grid
-- `Compact Grid` - Alta densidad de información
-- `Focus Grid` - Área de enfoque + componentes secundarios
-- `Asymmetric` - Diseño asimétrico moderno
-- `Priority Layout` - Basado en prioridad de variables
-- `Column Layout` - Columnas verticales
-- `High Density Grid` - Máxima utilización del espacio
-- `Dynamic Dashboard` - Adaptativo según contenido
+- **Variables tipadas**: numérica, categórica, temporal, porcentaje (progreso o ratio), texto y binaria, cada
+  una con prioridad alta, media o baja.
+- **Combinaciones automáticas**: cruza variables compatibles (por ejemplo numérica con temporal en líneas o
+  áreas, numérica con categórica en barras) y respeta las combinaciones que excluyas.
+- **Layouts que llenan la grilla**: varios patrones (grid, hero, asimétrico, por prioridad, alta densidad,
+  entre otros) sin huecos.
+- **Once paletas validadas** en modo claro y oscuro: Aurora, Océano, Atardecer, Bosque, Vibrante, Corporativo,
+  Cítrico, Nórdico, Lavanda, Brasa y Medianoche. "Otra paleta" cambia los colores sin tocar la distribución.
+- **Especificación en PDF**: grilla, variables, combinaciones y tipos de gráfico, lista para entregar a quien
+  construya el dashboard.
 
-### 📊 **Visualizaciones de Datos**
-Tipos de gráficos soportados:
-- Barras (vertical/horizontal)
-- Líneas y Áreas
-- Pie/Donut
-- Radial/Progress
-- Métricas numéricas
+## Instalación
 
-#### Paletas de Colores:
-11 paletas validadas en modo claro y oscuro (Aurora, Océano, Atardecer, Bosque, Vibrante, Corporativo, Cítrico,
-Nórdico, Lavanda, Brasa, Medianoche). "Otra paleta" cambia la paleta de un layout sin tocar su distribución.
-
-### 📄 **Exportación a PDF**
-- Especificaciones completas del dashboard
-- Visualización del grid layout
-- Información detallada de variables
-- Combinaciones de datos
-- Header y footer profesionales
-
-### 💾 **Dashboards Guardados**
-- Todo se guarda solo en este navegador (`localStorage`), sin cuentas ni servidor
-- Varios dashboards: abrir, renombrar y eliminar desde "Tus dashboards" en la página inicial
-- Empezar uno nuevo no pierde el anterior; las pestañas abiertas se mantienen sincronizadas
-- Exportar uno o todos a un archivo `.json` e importarlo en otro navegador o máquina
-- Compartir un layout con un link: lleva la definición y el layout en el fragmento de la URL (`#share=`), que el
-  navegador nunca envía al servidor
-- Si el almacenamiento está lleno o bloqueado, un aviso lo indica; los datos dañados se reparan al cargar
-
----
-
-## 🚀 Inicio Rápido
-
-### Requisitos Previos
-- **Node.js** 24 LTS (ver `.nvmrc`; mínimo 20.9)
-- **npm** (único gestor de paquetes; el lockfile es `package-lock.json`)
-
-### Instalación
+Requisitos: Node.js 24 LTS (ver `.nvmrc`; mínimo 20.9) y npm.
 
 ```bash
 git clone https://github.com/ingermanr/rapidash-dashboard-generator.git
 cd rapidash-dashboard-generator
-nvm use        # opcional, usa la versión de .nvmrc
+nvm use        # opcional
 npm ci
+npm run dev    # http://localhost:3000
 ```
-
-### Scripts
 
 | Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Servidor de desarrollo en http://localhost:3000 |
-| `npm run build` | Build de producción |
-| `npm start` | Servidor de producción |
-| `npm run typecheck` | Verificación de tipos (`tsc --noEmit`) |
-| `npm run lint` | ESLint con cero warnings permitidos |
+| --- | --- |
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` / `npm start` | Build y servidor de producción |
+| `npm run typecheck` | Verificación de tipos |
+| `npm run lint` | ESLint, sin warnings permitidos |
 | `npm test` | Tests con Jest |
-| `npm run test:watch` | Tests en modo watch |
 | `npm run test:coverage` | Reporte de cobertura |
-| `npm run verify` | Typecheck + lint + tests + build |
+| `npm run verify` | Typecheck, lint, tests y build: el chequeo obligatorio antes de cada PR |
 
-### Antes de cada PR
+## Uso
 
-No hay CI remoto: ejecuta `npm run verify` y asegúrate de que pase antes de abrir o mergear un PR.
+1. **Define las variables**: nombre, tipo y prioridad.
+2. **Excluye combinaciones** que no tengan sentido para tu negocio (opcional).
+3. **Genera un layout**. Cada clic produce una variante nueva; el historial guarda las anteriores.
+4. **Abre la vista detallada** para ver el dashboard con datos de ejemplo, aplicar filtros y probar otra paleta.
+5. **Descarga el PDF** con la especificación completa.
 
----
+## Guardar y compartir
 
-## 📁 Estructura del Proyecto
+Todo queda en este navegador (`localStorage`), sin cuentas ni servidor.
 
-```
-dashboard-generator/
-├── app/                      # Next.js App Router
-│   ├── layout.tsx           # Layout raíz
-│   ├── page.tsx             # Elige la vista según el estado
-│   └── globals.css          # Estilos globales
-│
-├── components/              # Componentes React
-│   ├── dashboard-detailed-preview.tsx  # Contenedor de la vista detallada
-│   ├── dashboard-preview/              # Piezas de la vista detallada
-│   │   ├── charts/                     # Un componente por tipo de gráfico
-│   │   ├── combination-card.tsx        # Tarjeta de una visualización
-│   │   ├── dashboard-grid.tsx          # Render del layout en el grid
-│   │   ├── filter-card.tsx             # Filtro por variable
-│   │   └── independent-variable-card.tsx
-│   ├── generator/                      # Vistas de la app: landing, constructor y detalle
-│   ├── layout-preview.tsx              # Preview de layouts
-│   ├── variable-input.tsx              # Input de variables
-│   ├── theme-toggle.tsx                # Toggle de tema
-│   └── ui/                             # Primitivas UI (shadcn/ui + Radix)
-│
-├── lib/                     # Lógica sin React
-│   ├── domain/              # Generación de variantes, datos de ejemplo y RNG con semilla
-│   ├── pdf/                 # Exportación de la especificación a PDF
-│   ├── layout-engine.ts     # Motor de layouts (grid de 12 columnas)
-│   └── utils.ts             # Utilidades
-│
-├── store/                   # Estado global (Zustand)
-│   ├── dashboard-store.ts   # Store principal
-│   ├── hooks.ts             # Hooks personalizados
-│   └── index.ts             # Exports
-│
-├── types/                   # TypeScript types
-│   └── dashboard.ts         # Tipos del dashboard
-│
-├── hooks/                   # React hooks
-│   └── use-toast.ts         # Sistema de toasts
-│
-├── __tests__/               # Tests
-│   ├── components/          # Tests de componentes
-│   ├── lib/                 # Tests de utilidades
-│   └── types/               # Tests de tipos
-│
-└── public/                  # Assets estáticos
-    └── manifest.json        # PWA manifest
-```
+- **Varios dashboards**: se guardan solos mientras trabajas. Desde "Tus dashboards" se abren, renombran y
+  eliminan; empezar uno nuevo no pierde el anterior, y las pestañas abiertas se mantienen sincronizadas.
+- **Exportar e importar**: "Exportar" descarga un dashboard en `.json` y "Exportar todos" la lista completa.
+  "Importar" los agrega sin reemplazar los existentes y descarta los que estén dañados.
+- **Compartir**: en la vista detallada, "Compartir" copia un link con la definición y el layout. Viaja en el
+  fragmento de la URL (`#share=`), que el navegador nunca envía al servidor, y quien lo abre lo recibe como un
+  dashboard nuevo.
+- **Robustez**: si el almacenamiento está lleno o bloqueado, un aviso lo indica; los datos dañados se reparan
+  al cargar y el formato guardado tiene versión con migración.
 
----
+## Arquitectura
 
-## 🎯 Uso
+| Carpeta | Contenido |
+| --- | --- |
+| `app/` | Página principal (contenedor) y layout de Next.js |
+| `components/generator/` | Vistas: inicio, constructor, detalle y lista de dashboards guardados |
+| `components/ui/` | Primitivas estilo shadcn/ui sobre Radix |
+| `lib/domain/` | Lógica pura y testeable: generador de variantes, paletas, filtros, saneamiento, export/import, links |
+| `lib/layout-engine.ts` | Grilla de 12 columnas y divisiones de cada patrón de layout |
+| `lib/pdf/` | Generación de la especificación en PDF |
+| `lib/persistence/` | Almacenamiento seguro que nunca lanza errores y reporta cuota llena |
+| `store/` | Estado global con Zustand y persistencia versionada |
 
-### 1. **Crear Variables**
-1. Ingresa el nombre de la variable
-2. Selecciona el tipo de dato
-3. Define la prioridad (alta/media/baja)
-4. Agrega la variable
+La lógica de dominio no depende de React y recibe el azar y el reloj como dependencias, así que las
+variantes son reproducibles en los tests.
 
-### 2. **Excluir Combinaciones** (Opcional)
-- Selecciona variables que no deben combinarse
-- Agrega una descripción del por qué
-- El sistema respetará estas exclusiones
+## Calidad
 
-### 3. **Generar Layouts**
-1. Click en "Generar Dashboard Variants"
-2. El sistema genera variantes únicas e inteligentes
-3. Cada variante incluye:
-   - Patrón de layout optimizado
-   - Paleta de colores
-   - Combinaciones de variables
-   - Tipos de visualizaciones
+- Tests de dominio, store y flujos completos de la app con Jest y Testing Library.
+- Auditoría de accesibilidad con axe-core y contraste verificado en modo claro y oscuro.
+- `npm run verify` es la compuerta local: no hay CI remoto, así que debe pasar antes de abrir o mergear un PR.
 
-### 4. **Explorar Variantes**
-- Visualiza múltiples opciones de layout
-- Compara diferentes enfoques
-- Analiza las combinaciones propuestas
+## Roadmap
 
-### 5. **Vista Detallada**
-- Click en cualquier variante para ver detalles
-- Filtros dinámicos interactivos
-- Métricas principales destacadas
-- Preview completo del dashboard
+- **Construir el dashboard con IA**: conectar la especificación de un dashboard con cualquier proveedor de IA
+  para que el diseño se haga realidad con los datos del usuario. La base es un contrato estable en JSON
+  (variables, tipos, combinaciones, grilla y paleta) y un adaptador por proveedor, sin atar la app a ninguno.
+- Actualizaciones de seguridad de dependencias (Next.js y jsPDF).
+- Grilla adaptada a pantallas móviles.
+- PDF: numeración de páginas real, títulos largos y aviso cuando se recortan componentes.
 
-### 6. **Exportar a PDF**
-- Click en "Descargar PDF"
-- Obtén especificaciones completas
-- Listas para compartir con desarrolladores
+## Licencia
 
-### 7. **Guardar, Exportar e Importar**
-- Los cambios se guardan automáticamente en el dashboard abierto
-- "Mis dashboards" (en el constructor) vuelve a la lista de dashboards guardados
-- "Exportar" descarga un dashboard; "Exportar todos" descarga la lista completa
-- "Importar" carga un archivo exportado: los dashboards se agregan sin reemplazar los existentes y se
-  descartan los que estén dañados
-- "Compartir" (en la vista detallada) copia un link; quien lo abre recibe ese layout como un dashboard nuevo
+MIT. Ver [LICENSE](LICENSE).
 
----
-
-## 🏗️ Arquitectura
-
-### **Motor de Layouts**
-El corazón del sistema es `lib/layout-engine.ts`:
-
-```typescript
-// Sistema de grid de 12 columnas
-export const GRID_CONFIG = {
-  COLUMNS: 12,
-  MIN_COMPONENT_WIDTH: 3,
-  MIN_COMPONENT_HEIGHT: 1,
-  DEFAULT_HEIGHT: 1,
-}
-
-// Generación de divisiones del layout
-getRealLayoutDivisions(layout: string, count: number): LayoutDivision[]
-
-// Análisis de calidad
-analyzeLayoutQuality(layout: string, combinations: VariableCombination[]): number
-```
-
-### **Estado Global con Zustand**
-Gestión eficiente del estado con persistencia:
-
-```typescript
-// Variables y configuración
-const { variables, excludedCombinations } = useVariables()
-
-// Layouts y variantes
-const { currentVariant, generationHistory, selectedVariant } = useLayouts()
-
-// Información del dashboard
-const { dashboardTitle, dashboardDescription } = useDashboardInfo()
-
-// Dashboards guardados (el dashboard abierto se autoguarda en `savedDashboards`)
-const { savedDashboards, openDashboard, importDashboards } = useDashboardStore.getState()
-```
-
-El estado persistido tiene versión (`version: 1`, con migración desde la versión anterior) y todo lo que se lee
-del almacenamiento pasa por `lib/domain/sanitize.ts` antes de llegar a los componentes.
-
-### **Sistema de Tipos**
-TypeScript completo para type-safety:
-
-```typescript
-interface Variable {
-  id: string
-  name: string
-  type: VariableType
-  priority: VariablePriority
-}
-
-interface LayoutVariant {
-  id: string
-  layout: string
-  palette: ColorPalette
-  variables: Variable[]
-  combinations: VariableCombination[]
-}
-```
-
----
-
-## 🧪 Testing
-
-### Cobertura Actual
-- ✅ Tests de componentes
-- ✅ Tests de utilidades
-- ✅ Tests de tipos
-
-### Suite de Tests
-```bash
-__tests__/
-├── components/
-│   ├── pdf-generation.test.tsx
-│   └── variable-input.test.tsx
-├── lib/
-│   └── utils.test.ts
-└── types/
-    └── dashboard.test.ts
-```
-
----
-
-## 🎨 Componentes UI
-
-Las primitivas viven en `components/ui/` (estilo shadcn/ui sobre Radix): `Badge`, `Button`, `Card`, `Input`, `Select`, `Textarea` y `Toast`. Solo se mantienen las que se usan; para agregar otra, usa `npx shadcn@latest add <componente>` (la configuración está en `components.json`).
-
----
-
-## 🔧 Configuración
-
-### **Tailwind CSS**
-Configuración en `postcss.config.mjs`:
-```javascript
-export default {
-  plugins: {
-    '@tailwindcss/postcss': {},
-  },
-}
-```
-
-### **TypeScript**
-Configuración estricta en `tsconfig.json`:
-```json
-{
-  "compilerOptions": {
-    "strict": true,
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "jsx": "preserve"
-  }
-}
-```
-
-### **Jest**
-Testing configurado con JSDOM:
-```javascript
-module.exports = {
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-  }
-}
-```
-
----
-
-## 🚀 Deployment
-
-### Vercel (Recomendado)
-```bash
-# Instalar Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-```
-
-### Build Manual
-```bash
-# Construir
-npm run build
-
-# El output estará en .next/
-# Servir con
-npm start
-```
-
----
-
-## 📦 Dependencias Principales
-
-| Paquete | Versión | Propósito |
-|---------|---------|-----------|
-| Next.js | 15.5.7 | Framework React |
-| React | 19 | UI Library |
-| TypeScript | 5 | Type Safety |
-| Tailwind CSS | 4.1.9 | Styling |
-| Zustand | 5.0.8 | State Management |
-| Radix UI | Latest | UI Components |
-| Recharts | 3.2.1 | Visualizaciones |
-| jsPDF | 3.0.3 | PDF Export |
-| Jest | 30.2.0 | Testing |
-
----
-
-## 🤝 Contribuir
-
-1. Fork el proyecto
-2. Crea una rama (`git checkout -b feature/amazing-feature`)
-3. Commit tus cambios (`git commit -m 'Add amazing feature'`)
-4. Push a la rama (`git push origin feature/amazing-feature`)
-5. Abre un Pull Request
-
----
-
-## 📝 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
-
----
-
-## 👨‍💻 Autor
-
-**Germán Alonso Rodríguez** - [@ingermanr](https://github.com/ingermanr)
-
----
-
-## 🙏 Agradecimientos
-
-- [Next.js](https://nextjs.org/)
-- [Radix UI](https://www.radix-ui.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Recharts](https://recharts.org/)
-- [Zustand](https://zustand-demo.pmnd.rs/)
-
----
-
-**¿Preguntas o sugerencias?** Abre un issue o contacta al equipo de desarrollo.
+Autor: Germán Alonso Rodríguez ([@ingermanr](https://github.com/ingermanr)).
