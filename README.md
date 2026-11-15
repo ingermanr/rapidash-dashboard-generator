@@ -45,7 +45,8 @@ El resultado se puede explorar, filtrar, exportar como especificación en PDF y 
   entre otros) sin huecos.
 - **Once paletas validadas** en modo claro y oscuro: Aurora, Océano, Atardecer, Bosque, Vibrante, Corporativo,
   Cítrico, Nórdico, Lavanda, Brasa y Medianoche. "Otra paleta" cambia los colores sin tocar la distribución.
-- **Especificación en PDF**: grilla, variables, combinaciones y tipos de gráfico, lista para entregar a quien
+- **Especificación en PDF**: resumen con índice, diagrama del layout con cada componente numerado, tabla de
+  componentes, variables con su tipo y uso, y la paleta en modo claro y oscuro. Lista para entregar a quien
   construya el dashboard.
 
 ## Instalación
@@ -119,9 +120,6 @@ variantes son reproducibles en los tests.
 - **Construir el dashboard con IA**: conectar la especificación de un dashboard con cualquier proveedor de IA
   para que el diseño se haga realidad con los datos del usuario. La base es un contrato estable en JSON
   (variables, tipos, combinaciones, grilla y paleta) y un adaptador por proveedor, sin atar la app a ninguno.
-- Actualizaciones de seguridad de dependencias (Next.js y jsPDF).
-- Grilla adaptada a pantallas móviles.
-- PDF: numeración de páginas real, títulos largos y aviso cuando se recortan componentes.
 
 ## Licencia
 
