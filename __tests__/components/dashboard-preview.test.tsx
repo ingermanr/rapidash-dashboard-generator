@@ -66,6 +66,25 @@ describe('CombinationCard', () => {
   })
 })
 
+describe('CombinationCard meter caption', () => {
+  it('reads "Progreso actual" for progress toward a goal and "Del total" for a share', () => {
+    const share: Variable = { id: 'margin', name: 'Margen', type: 'percentage-ratio', priority: 'media' }
+    const { unmount } = render(
+      <CombinationCard combination={combination({ chartType: 'progress', numericVariable: completion })} palette={palette} index={0} size="medium" />,
+    )
+    expect(screen.getByText('Progreso actual')).toBeInTheDocument()
+    unmount()
+
+    render(<CombinationCard combination={combination({ chartType: 'progress', numericVariable: share })} palette={palette} index={0} size="medium" />)
+    expect(screen.getByText('Del total')).toBeInTheDocument()
+  })
+
+  it('hides the icon and the chart-type badge on small cards so the chart keeps its room', () => {
+    render(<CombinationCard combination={combination({ chartType: 'bar' })} palette={palette} index={0} size="small" />)
+    expect(screen.getByText('Barras')).toHaveClass('hidden')
+  })
+})
+
 describe('DashboardGrid', () => {
   it('renders one card per combination', () => {
     const combos = ['A', 'B', 'C'].map((name) => combination({ id: `c-${name}`, name }))

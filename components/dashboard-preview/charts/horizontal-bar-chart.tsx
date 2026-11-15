@@ -38,6 +38,7 @@ export function HorizontalBarChart({
           axisLine={{ stroke: axisColor }}
           tickLine={{ stroke: axisColor }}
           tickMargin={5}
+          tickCount={size === "small" ? 3 : 5}
         />
         <YAxis
           type="category"
@@ -49,6 +50,8 @@ export function HorizontalBarChart({
           tickLine={{ stroke: axisColor }}
           width={yAxisWidth}
           tickMargin={5}
+          // Name every bar: Recharts would otherwise skip category labels when space is tight.
+          interval={0}
         />
         <Tooltip
           contentStyle={{

@@ -33,10 +33,11 @@ export function CombinationCard({ combination, palette, index, size }: Combinati
       
       <div className="relative flex h-full flex-col p-4">
         {/* Modern Header */}
-        <div className="mb-3 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div 
-              className="flex h-9 w-9 items-center justify-center rounded-xl backdrop-blur-sm border transition-all duration-200"
+        <div className="mb-3 flex items-center justify-between gap-2 flex-shrink-0">
+          <div className="flex min-w-0 items-center gap-3">
+            {/* Small cards keep their width for the title and the chart: no icon and no chart-type badge. */}
+            <div
+              className={`${size === "small" ? "hidden" : "flex"} h-9 w-9 shrink-0 items-center justify-center rounded-xl backdrop-blur-sm border transition-all duration-200`}
               style={{ 
                 backgroundColor: `${color}15`,
                 borderColor: `${color}30`
@@ -44,17 +45,19 @@ export function CombinationCard({ combination, palette, index, size }: Combinati
             >
               {getIconForChartType(combination.chartType, color)}
             </div>
-            <div>
-              <h3 className="font-semibold text-foreground text-sm leading-tight">{combination.name}</h3>
+            <div className="min-w-0">
+              <h3 className="line-clamp-2 font-semibold text-foreground text-sm leading-tight" title={combination.name}>
+                {combination.name}
+              </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {combination.numericVariable.name}
                 {combination.categoricalVariable && ` • ${combination.categoricalVariable.name}`}
               </p>
             </div>
           </div>
-          <Badge 
-            variant="secondary" 
-            className="text-xs font-medium rounded-lg border-0 text-foreground/80"
+          <Badge
+            variant="secondary"
+            className={`${size === "small" ? "hidden" : ""} shrink-0 text-xs font-medium rounded-lg border-0 text-foreground/80`}
             style={{
               backgroundColor: `${color}1a`,
               boxShadow: `inset 0 0 0 1px ${color}40`,
@@ -88,7 +91,14 @@ export function CombinationCard({ combination, palette, index, size }: Combinati
             {combination.chartType === "radial" && (
               <RadialChart colors={colors} combination={combination} size={size} />
             )}
-            {combination.chartType === "progress" && <ProgressBar color={color} size={size} seedKey={combination.id} />}
+            {combination.chartType === "progress" && (
+              <ProgressBar
+                color={color}
+                size={size}
+                seedKey={combination.id}
+                caption={combination.numericVariable.type === "percentage-progress" ? "Progreso actual" : "Del total"}
+              />
+            )}
             {combination.chartType === "metric" && <MetricDisplay color={color} name={combination.name} size={size} seedKey={combination.id} />}
           </div>
         </div>

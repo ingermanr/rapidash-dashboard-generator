@@ -31,6 +31,7 @@ export function BarChart({
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
         <XAxis
           dataKey="name"
+          interval={0}
           stroke={axisColor}
           fontSize={fontSize}
           tick={{ fill: axisColor, fontSize }}
