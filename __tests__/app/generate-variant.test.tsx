@@ -51,4 +51,41 @@ describe('DashboardGenerator variant generation', () => {
     expect(second).not.toBe(first)
     expect(second?.combinations.some(combinesSalesAndRegion)).toBe(false)
   })
+
+  it('builds the layout from the variables present when it is produced, not when the button was clicked', async () => {
+    const date: Variable = { id: 'var-date', name: 'Fecha', type: 'temporal', priority: 'baja' }
+    render(<DashboardGenerator />)
+
+    act(() => {
+      screen.getByRole('button', { name: /^Generar Layout$/ }).click()
+    })
+    act(() => {
+      useDashboardStore.getState().addVariable(date)
+    })
+    await act(async () => {
+      jest.advanceTimersByTime(1000)
+    })
+
+    const variant = useDashboardStore.getState().currentVariant
+    expect(variant?.variables.map((v) => v.id)).toEqual([sales.id, region.id, date.id])
+  })
+
+  it('drops a pending layout when the user leaves the builder before it is ready', async () => {
+    render(<DashboardGenerator />)
+
+    act(() => {
+      screen.getByRole('button', { name: /^Generar Layout$/ }).click()
+    })
+    act(() => {
+      screen.getByRole('button', { name: /Mis dashboards/ }).click()
+    })
+    await act(async () => {
+      jest.advanceTimersByTime(1000)
+    })
+
+    const state = useDashboardStore.getState()
+    expect(state.currentVariant).toBeNull()
+    expect(state.generationHistory).toEqual([])
+    expect(state.isGenerating).toBe(false)
+  })
 })

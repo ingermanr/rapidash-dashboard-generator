@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { ArrowRight, BarChart3, FileText, Layout, Sparkles, FolderOpen } from "lucide-react"
 import { Logo } from "@/components/brand/logo"
 import { LayoutPreview } from "@/components/layout-preview"
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { VariableInput } from "@/components/variable-input"
 import { generateSingleLayoutVariant } from "@/lib/domain/variant-generator"
-import { useDashboardInfo, useLayouts, useVariables } from "@/store"
+import { useDashboardInfo, useDashboardStore, useLayouts, useVariables } from "@/store"
 
 export interface BuilderViewProps {
   onStartOver: () => void
@@ -20,7 +20,7 @@ export interface BuilderViewProps {
 
 /** Main workspace: define variables, generate layout variants and browse the history. */
 export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps) {
-  const { variables, excludedCombinations } = useVariables()
+  const { variables } = useVariables()
   const { 
     currentVariant, 
     generationHistory, 
@@ -34,16 +34,33 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
   } = useLayouts()
   const { dashboardTitle, dashboardDescription, setDashboardTitle, setDashboardDescription } = useDashboardInfo()
 
+  const pendingGeneration = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Leaving the builder cancels a pending layout, so it never lands in another dashboard.
+  useEffect(
+    () => () => {
+      if (pendingGeneration.current === null) return
+      clearTimeout(pendingGeneration.current)
+      pendingGeneration.current = null
+      setIsGenerating(false)
+    },
+    [setIsGenerating],
+  )
+
   const generateVariant = useCallback(() => {
+    if (pendingGeneration.current !== null) return
     setIsGenerating(true)
 
-    setTimeout(() => {
+    pendingGeneration.current = setTimeout(() => {
+      pendingGeneration.current = null
+      // Read the store when the layout is produced: the variables may have changed during the wait.
+      const { variables, generationHistory, excludedCombinations } = useDashboardStore.getState()
       const newVariant = generateSingleLayoutVariant(variables, generationHistory, excludedCombinations)
       setCurrentVariant(newVariant)
       addToHistory(newVariant)
       setIsGenerating(false)
     }, 800)
-  }, [variables, generationHistory, excludedCombinations, setIsGenerating, setCurrentVariant, addToHistory])
+  }, [setIsGenerating, setCurrentVariant, addToHistory])
 
   const deleteVariant = useCallback((variantId: string) => {
     removeFromHistory(variantId)
