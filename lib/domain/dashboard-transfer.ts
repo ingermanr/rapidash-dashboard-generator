@@ -24,7 +24,7 @@ export function buildExport(dashboards: SavedDashboard[], now: () => number = Da
   return { format: EXPORT_FORMAT, version: EXPORT_VERSION, exportedAt: now(), dashboards }
 }
 
-function slug(text: string): string {
+export function slug(text: string): string {
   return (
     text
       .normalize("NFD")
