@@ -32,6 +32,10 @@ describe('DashboardGenerator variant generation', () => {
   })
 
   it('respects exclusions added after the variables were loaded', async () => {
+    // A temporal variable keeps a chart available (Ventas over time) once Ventas × Region is excluded.
+    act(() => {
+      useDashboardStore.getState().addVariable({ id: 'var-month', name: 'Mes', type: 'temporal', priority: 'baja' })
+    })
     render(<DashboardGenerator />)
 
     await clickGenerate(/^Generar Layout$/)
