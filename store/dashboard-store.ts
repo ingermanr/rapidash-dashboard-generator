@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 import type { Variable, LayoutVariant, ExcludedCombination } from '@/types/dashboard'
 import { regeneratePalette } from '@/lib/domain/palettes'
 import { createSafeStorage } from '@/lib/persistence/safe-storage'
+import type { SharePayload } from '@/lib/domain/share-link'
 import { sanitizeSavedDashboards } from '@/lib/domain/sanitize'
 import { reportWrite } from './persistence-status'
 import {
@@ -71,6 +72,7 @@ export interface DashboardState {
   renameDashboard: (id: string, title: string) => void
   deleteDashboard: (id: string) => void
   importDashboards: (dashboards: SavedDashboard[]) => void
+  openSharedDashboard: (shared: SharePayload) => void
 
   // Utilidades
   reset: () => void
@@ -231,6 +233,20 @@ export const useDashboardStore = create<DashboardState>()(
         savedDashboards: renameSavedDashboard(state.savedDashboards, id, title),
         ...(state.activeDashboardId === id ? { dashboardTitle: title.trim() } : {}),
       })),
+
+      // A shared link always becomes a new dashboard (autosave stores it); nothing existing is replaced.
+      openSharedDashboard: (shared) => set({
+        ...emptyWorkspace,
+        activeDashboardId: null,
+        dashboardTitle: shared.title,
+        dashboardDescription: shared.description,
+        variables: shared.variables,
+        excludedCombinations: shared.excludedCombinations,
+        generationHistory: [shared.variant],
+        currentVariant: shared.variant,
+        selectedVariant: shared.variant,
+        showLanding: false,
+      }),
 
       importDashboards: (dashboards) => set((state) => ({
         savedDashboards: [...dashboards, ...state.savedDashboards],

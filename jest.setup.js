@@ -94,3 +94,9 @@ global.ResizeObserver = class ResizeObserver {
     return null
   }
 }
+// jsdom has no Compression Streams; Node does (browsers have had them since 2023).
+if (typeof CompressionStream === 'undefined') {
+  const web = require('stream/web')
+  global.CompressionStream = web.CompressionStream
+  global.DecompressionStream = web.DecompressionStream
+}

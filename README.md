@@ -70,6 +70,8 @@ Nórdico, Lavanda, Brasa, Medianoche). "Otra paleta" cambia la paleta de un layo
 - Varios dashboards: abrir, renombrar y eliminar desde "Tus dashboards" en la página inicial
 - Empezar uno nuevo no pierde el anterior; las pestañas abiertas se mantienen sincronizadas
 - Exportar uno o todos a un archivo `.json` e importarlo en otro navegador o máquina
+- Compartir un layout con un link: lleva la definición y el layout en el fragmento de la URL (`#share=`), que el
+  navegador nunca envía al servidor
 - Si el almacenamiento está lleno o bloqueado, un aviso lo indica; los datos dañados se reparan al cargar
 
 ---
@@ -204,6 +206,7 @@ dashboard-generator/
 - "Exportar" descarga un dashboard; "Exportar todos" descarga la lista completa
 - "Importar" carga un archivo exportado: los dashboards se agregan sin reemplazar los existentes y se
   descartan los que estén dañados
+- "Compartir" (en la vista detallada) copia un link; quien lo abre recibe ese layout como un dashboard nuevo
 
 ---
 
