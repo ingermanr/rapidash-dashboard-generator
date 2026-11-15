@@ -90,8 +90,9 @@ export function VariableInput() {
     removeVariableFromStore(id)
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Ignore the Enter that confirms an IME composition (accents, CJK input).
+    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
       handleAddVariable()
     }
   }
@@ -204,14 +205,14 @@ export function VariableInput() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
             {/* Campo de Nombre - Más ancho en desktop */}
             <div className="space-y-1.5 sm:col-span-2 lg:col-span-2">
-              <label className="text-xs font-semibold text-foreground">Nombre de la Variable</label>
+              <label htmlFor="variable-name" className="text-xs font-semibold text-foreground">Nombre de la Variable</label>
               <Input
                 placeholder="Ej: Ventas, Usuarios, Ingresos..."
                 value={name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyDown={handleKeyDown}
                 className={`h-9 border bg-background/80 text-sm transition-all focus:border-primary/60 focus:bg-background ${error ? "border-destructive focus:border-destructive" : "border-border/60"}`}
-                aria-label="Nombre de la variable"
+                id="variable-name"
                 aria-invalid={!!error}
                 aria-describedby={error ? "variable-error" : undefined}
               />
@@ -219,9 +220,9 @@ export function VariableInput() {
             
             {/* Campo de Tipo */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">Tipo</label>
+              <label htmlFor="variable-type" className="text-xs font-semibold text-foreground">Tipo</label>
               <Select value={type} onValueChange={(v) => setType(v as VariableType)}>
-                <SelectTrigger className="h-9 border border-border/60 bg-background/80 text-sm transition-all focus:border-primary/60" aria-label="Tipo de variable">
+                <SelectTrigger className="h-9 border border-border/60 bg-background/80 text-sm transition-all focus:border-primary/60" id="variable-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -242,9 +243,9 @@ export function VariableInput() {
             
             {/* Campo de Importancia */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">Importancia</label>
+              <label htmlFor="variable-priority" className="text-xs font-semibold text-foreground">Importancia</label>
               <Select value={priority} onValueChange={(v) => setPriority(v as VariablePriority)}>
-                <SelectTrigger className="h-9 border border-border/60 bg-background/80 text-sm transition-all focus:border-primary/60" aria-label="Prioridad de la variable">
+                <SelectTrigger className="h-9 border border-border/60 bg-background/80 text-sm transition-all focus:border-primary/60" id="variable-priority">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

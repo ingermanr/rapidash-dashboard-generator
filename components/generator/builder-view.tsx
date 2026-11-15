@@ -76,6 +76,9 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
     }, 800)
   }, [setIsGenerating, setCurrentVariant, addToHistory, toast])
 
+  /** Zero-based position in the generation history: "Variante N" keeps the order layouts were generated in. */
+  const generationNumber = (variantId: string) => Math.max(0, generationHistory.findIndex((v) => v.id === variantId))
+
   // Every layout except the one shown as current, newest first.
   const previousVariants = generationHistory.filter((v) => v.id !== currentVariant?.id).reverse()
 
@@ -286,7 +289,7 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
             </div>
             <LayoutPreview
               variant={currentVariant}
-              index={0}
+              index={generationNumber(currentVariant.id)}
               onSelect={() => setSelectedVariant(currentVariant)}
               onDelete={deleteVariant}
               onRegeneratePalette={() => regenerateVariantPalette(currentVariant.id)}
@@ -310,11 +313,11 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
               </div>
             </div>
             <div className="grid gap-6 lg:grid-cols-2">
-              {previousVariants.map((variant, index) => (
+              {previousVariants.map((variant) => (
                   <LayoutPreview
                     key={variant.id}
                     variant={variant}
-                    index={index}
+                    index={generationNumber(variant.id)}
                     onSelect={() => setSelectedVariant(variant)}
                     onDelete={deleteVariant}
                     onRegeneratePalette={() => regenerateVariantPalette(variant.id)}
