@@ -1,4 +1,11 @@
-import { getRealLayoutDivisions } from "@/lib/layout-engine"
+import {
+  componentRows,
+  diagramBoxes,
+  pdfFileName,
+  readableTextColor,
+  variableRows,
+  type Area,
+} from "@/lib/pdf/spec-content"
 import type { LayoutVariant } from "@/types/dashboard"
 
 export interface DashboardSpecPdfInput {
@@ -7,591 +14,362 @@ export interface DashboardSpecPdfInput {
   description: string
 }
 
-/** Builds the dashboard specification PDF and triggers its download. Throws if generation fails. */
-export async function exportDashboardSpecPdf({
-  variant,
-  title: dashboardTitle,
-  description: dashboardDescription,
-}: DashboardSpecPdfInput): Promise<void> {
-  const { combinations, variables } = variant
-  const { jsPDF } = await import("jspdf")
-  
-  const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const margin = 15
-  let yPosition = margin
+/* A4 portrait, millimetres. */
+const MARGIN = 18
+const HEADER_BOTTOM = 26
+const FOOTER_TOP = 282
 
-  // Helper function to convert hex to RGB
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    return result ? [
-      parseInt(result[1], 16),
-      parseInt(result[2], 16),
-      parseInt(result[3], 16)
-    ] : [0, 102, 204]
+const BRAND = "#0054ee"
+const INK = "#0f172a"
+const MUTED = "#64748b"
+const LINE = "#e2e8f0"
+const SURFACE = "#f8fafc"
+
+const SECTIONS = ["Layout", "Componentes", "Variables", "Paleta de colores"] as const
+type Section = (typeof SECTIONS)[number]
+
+const PALETTE_ROLES = ["Principal", "Secundario", "Acento", "Datos", "Complemento"]
+
+interface Column<Row> {
+  header: string
+  width: number
+  value: (row: Row) => string
+  align?: "left" | "right"
+  /** Optional colour chip drawn before the value. */
+  chip?: (row: Row) => string
+}
+
+function rgb(hex: string): [number, number, number] {
+  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  return match ? [parseInt(match[1], 16), parseInt(match[2], 16), parseInt(match[3], 16)] : [0, 0, 0]
+}
+
+/**
+ * Draws the specification PDF: a summary page with a real index, then the layout diagram, the components,
+ * the variables and the palette. Every page carries "Página X de N". Throws if generation fails.
+ */
+export async function exportDashboardSpecPdf({ variant, title, description }: DashboardSpecPdfInput): Promise<void> {
+  const { jsPDF } = await import("jspdf")
+  const doc = new jsPDF({ unit: "mm", format: "a4" })
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const contentWidth = pageWidth - MARGIN * 2
+  const right = pageWidth - MARGIN
+  const shownTitle = title.trim() || "Dashboard sin título"
+  const generatedOn = new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" })
+  const sectionPages = new Map<Section, number>()
+  let y = MARGIN
+
+  const fill = (hex: string) => doc.setFillColor(...rgb(hex))
+  const stroke = (hex: string) => doc.setDrawColor(...rgb(hex))
+  const ink = (hex: string) => doc.setTextColor(...rgb(hex))
+  const font = (size: number, weight: "normal" | "bold" = "normal") => {
+    doc.setFont("helvetica", weight)
+    doc.setFontSize(size)
+  }
+  const currentPage = () => doc.getCurrentPageInfo().pageNumber
+
+  /** Shortens `text` with an ellipsis until it fits `width` in the current font. */
+  const fit = (text: string, width: number) => {
+    if (doc.getTextWidth(text) <= width) return text
+    let cut = text
+    while (cut.length > 1 && doc.getTextWidth(`${cut}…`) > width) cut = cut.slice(0, -1)
+    return `${cut.trimEnd()}…`
   }
 
-  // Extract primary color
-  const primaryColor = variant.palette.colors[0] || "#0066cc"
-  const [primaryR, primaryG, primaryB] = hexToRgb(primaryColor)
+  /** Wraps `text` to `width`, keeping at most `maxLines` (the last one gets an ellipsis if cut). */
+  const wrap = (text: string, width: number, maxLines = Infinity): string[] => {
+    const lines: string[] = doc.splitTextToSize(text, width)
+    const fitted = lines.map((line) => fit(line, width))
+    if (fitted.length <= maxLines) return fitted
+    const kept = fitted.slice(0, maxLines)
+    kept[maxLines - 1] = fit(`${kept[maxLines - 1]}…`, width)
+    return kept
+  }
 
-  // Check if we need a new page
-  const checkPageBreak = (spaceNeeded: number) => {
-    if (yPosition + spaceNeeded > pageHeight - 25) {
-      doc.addPage()
-      yPosition = margin + 10
+  const drawLogo = (x: number, top: number, size: number) => {
+    const s = size / 256
+    fill(BRAND)
+    doc.roundedRect(x, top, size, size, 56 * s, 56 * s, "F")
+    fill("#ffffff")
+    const tile = (tx: number, ty: number, w: number, h: number) => doc.roundedRect(x + tx * s, top + ty * s, w * s, h * s, 12 * s, 12 * s, "F")
+    tile(48, 48, 160, 44)
+    tile(48, 108, 92, 100)
+    tile(156, 108, 52, 42)
+    tile(156, 166, 52, 42)
+    fill(BRAND)
+    for (const [bx, by, bh] of [[64, 166, 26], [87, 146, 46], [110, 124, 68]]) doc.rect(x + bx * s, top + by * s, 14 * s, bh * s, "F")
+  }
+
+  /** Small running header on every page after the summary. */
+  const drawRunningHeader = () => {
+    drawLogo(MARGIN, 12, 6)
+    font(9, "bold")
+    ink(INK)
+    doc.text("Rapidash", MARGIN + 8.5, 16.4)
+    font(9)
+    ink(MUTED)
+    const label = fit(shownTitle, contentWidth - 40)
+    doc.text(label, right, 16.4, { align: "right" })
+    stroke(LINE)
+    doc.setLineWidth(0.2)
+    doc.line(MARGIN, 21, right, 21)
+  }
+
+  const newPage = () => {
+    doc.addPage()
+    drawRunningHeader()
+    y = HEADER_BOTTOM + 4
+  }
+
+  /** Starts a new page when `height` more millimetres would run into the footer. */
+  const ensureSpace = (height: number) => {
+    if (y + height > FOOTER_TOP - 6) {
+      newPage()
       return true
     }
     return false
   }
 
-  // Header function
-  const addHeader = (title: string, pageNum?: number) => {
-    doc.setFillColor(primaryR, primaryG, primaryB)
-    doc.rect(0, 0, pageWidth, 30, "F")
-    
-    doc.setFontSize(16)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(255, 255, 255)
-    doc.text(title, margin, 20)
-    
-    if (pageNum) {
-      doc.setFontSize(10)
-      doc.text(`Página ${pageNum}`, pageWidth - 30, 20)
+  const sectionHeading = (section: Section, intro?: string) => {
+    newPage()
+    sectionPages.set(section, currentPage())
+    const number = String(SECTIONS.indexOf(section) + 1).padStart(2, "0")
+    font(9, "bold")
+    ink(BRAND)
+    doc.text(number, MARGIN, y + 4)
+    font(18, "bold")
+    ink(INK)
+    doc.text(section, MARGIN + 9, y + 4)
+    y += 10
+    if (intro) {
+      font(10)
+      ink(MUTED)
+      const lines = wrap(intro, contentWidth)
+      doc.text(lines, MARGIN, y + 3)
+      y += lines.length * 4.6 + 3
     }
-    
-    yPosition = 45
+    y += 2
   }
 
-  // Footer function
-  const addFooter = () => {
-    doc.setDrawColor(200, 200, 200)
-    doc.setLineWidth(0.5)
-    doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15)
-    
-    doc.setFontSize(8)
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(100, 100, 100)
-    doc.text(`Generado el ${new Date().toLocaleDateString("es-ES")} - Dashboard Generator`, margin, pageHeight - 8)
-  }
-
-  // ====== PÁGINA 1: PORTADA E INFORMACIÓN GENERAL ======
-  addHeader("Especificación de Dashboard", 1)
-  
-  // Logo y título con mejor espaciado
-  doc.setFillColor(primaryR, primaryG, primaryB)
-  doc.rect(margin, yPosition, 40, 40, "F")
-  doc.setFontSize(20)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(255, 255, 255)
-  doc.text("DG", margin + 15, yPosition + 25)
-  
-  // Título principal
-  doc.setFontSize(24)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(40, 40, 40)
-  const title = dashboardTitle || "Dashboard Sin Título"
-  doc.text(title, margin + 55, yPosition + 20)
-  
-  // Subtítulo
-  doc.setFontSize(12)
-  doc.setFont("helvetica", "normal")
-  doc.setTextColor(100, 100, 100)
-  doc.text("Especificación Técnica y Visual", margin + 55, yPosition + 35)
-  
-  yPosition += 60
-
-  // Tabla de contenidos mejorada
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(primaryR, primaryG, primaryB)
-  doc.text("Tabla de Contenidos", margin, yPosition)
-  yPosition += 15
-
-  const tocItems = [
-    ["1. Información General", "1"],
-    ["2. Paleta de Colores", "2"], 
-    ["3. Gráficos y Variables", "3"],
-    ["4. Visualización del Layout", "4"]
-  ]
-
-  // Crear tabla de contenidos con mejor estructura
-  tocItems.forEach((item, index) => {
-    const itemY = yPosition + (index * 12)
-    
-    doc.setFontSize(10)
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(60, 60, 60)
-    doc.text(item[0], margin + 5, itemY + 8)
-    
-    // Puntos de separación
-    const dotsCount = Math.floor((pageWidth - margin * 2 - 80) / 3)
-    const dots = ".".repeat(dotsCount)
-    doc.setTextColor(150, 150, 150)
-    doc.text(dots, margin + 100, itemY + 8)
-    
-    doc.setTextColor(60, 60, 60)
-    doc.text(item[1], pageWidth - margin - 15, itemY + 8)
-  })
-
-  yPosition += tocItems.length * 12 + 25
-
-  // Verificar espacio para información general
-  checkPageBreak(120)
-  
-  // Información general con mejor espaciado
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(primaryR, primaryG, primaryB)
-  doc.text("Información General", margin, yPosition)
-  yPosition += 20
-
-  const infoData = [
-    ["Nombre del Proyecto", dashboardTitle || "Sin título"],
-    ["Paleta de Colores", variant.palette.name],
-    ["Tipo de Layout", variant.layout],
-    ["Total de Gráficos", combinations.length.toString()],
-    ["Variables Configuradas", variables.length.toString()],
-    ["Fecha de Creación", new Date().toLocaleDateString("es-ES")]
-  ]
-
-  const tableWidth = pageWidth - (margin * 2)
-  const col1Width = tableWidth * 0.4
-  const col2Width = tableWidth * 0.6
-  const rowHeight = 18
-
-  // Header de la tabla con mejor proporción
-  doc.setFillColor(primaryR, primaryG, primaryB)
-  doc.rect(margin, yPosition, tableWidth, rowHeight, "F")
-  doc.setFontSize(10)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(255, 255, 255)
-  doc.text("Atributo", margin + 5, yPosition + 12)
-  doc.text("Valor", margin + col1Width + 5, yPosition + 12)
-  yPosition += rowHeight
-
-  infoData.forEach((row, index) => {
-    const currentY = yPosition + (index * rowHeight)
-    
-    // Verificar si necesitamos nueva página
-    checkPageBreak(rowHeight + 5)
-    
-    // Fondo alternado
-    if (index % 2 === 0) {
-      doc.setFillColor(248, 249, 250)
-      doc.rect(margin, currentY, tableWidth, rowHeight, "F")
-    }
-    
-    // Bordes
-    doc.setDrawColor(220, 220, 220)
-    doc.setLineWidth(0.2)
-    doc.rect(margin, currentY, col1Width, rowHeight, "S")
-    doc.rect(margin + col1Width, currentY, col2Width, rowHeight, "S")
-    
-    // Texto con mejor espaciado
-    doc.setFontSize(9)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(70, 70, 70)
-    doc.text(row[0], margin + 5, currentY + 12)
-    
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(40, 40, 40)
-    doc.text(row[1], margin + col1Width + 5, currentY + 12)
-  })
-
-  yPosition += infoData.length * rowHeight + 30
-
-  // Descripción si existe
-  if (dashboardDescription) {
-    doc.setFontSize(14)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(60, 60, 60)
-    doc.text("Descripción del Proyecto", margin, yPosition)
-    yPosition += 15
-    
-    doc.setFontSize(11)
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(0, 0, 0)
-    const descLines = doc.splitTextToSize(dashboardDescription, pageWidth - (margin * 2))
-    doc.text(descLines, margin, yPosition)
-    yPosition += descLines.length * 6 + 20
-  }
-
-  addFooter()
-
-  addFooter()
-
-  // ====== PÁGINA 2: PALETA DE COLORES ======
-  doc.addPage()
-  addHeader("Paleta de Colores", 2)
-
-  // Información de la paleta
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(primaryR, primaryG, primaryB)
-  doc.text(`Paleta: ${variant.palette.name}`, margin, yPosition)
-  yPosition += 20
-
-  // Crear tabla de colores más compacta
-  const colorTableWidth = pageWidth - (margin * 2)
-  const colorRowHeight = 25
-  const colWidths = [20, 50, 60, colorTableWidth - 130] // #, Muestra, Código, Uso
-
-  // Header de la tabla
-  doc.setFillColor(primaryR, primaryG, primaryB)
-  doc.rect(margin, yPosition, colorTableWidth, colorRowHeight, "F")
-  
-  doc.setFontSize(10)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(255, 255, 255)
-  doc.text("#", margin + 8, yPosition + 16)
-  doc.text("Color", margin + colWidths[0] + 20, yPosition + 16)
-  doc.text("Código", margin + colWidths[0] + colWidths[1] + 5, yPosition + 16)
-  doc.text("Uso Recomendado", margin + colWidths[0] + colWidths[1] + colWidths[2] + 5, yPosition + 16)
-  
-  yPosition += colorRowHeight
-
-  // Mostrar hasta 8 colores para evitar desbordamiento
-  const colorsToShow = variant.palette.colors.slice(0, 8)
-  
-  colorsToShow.forEach((color, index) => {
-    const currentY = yPosition + (index * colorRowHeight)
-    
-    // Verificar espacio en página
-    checkPageBreak(colorRowHeight + 5)
-    
-    // Fondo alternado
-    if (index % 2 === 1) {
-      doc.setFillColor(248, 249, 250)
-      doc.rect(margin, currentY, colorTableWidth, colorRowHeight, "F")
-    }
-    
-    // Bordes de tabla
-    doc.setDrawColor(220, 220, 220)
-    doc.setLineWidth(0.2)
-    doc.rect(margin, currentY, colWidths[0], colorRowHeight, "S")
-    doc.rect(margin + colWidths[0], currentY, colWidths[1], colorRowHeight, "S")
-    doc.rect(margin + colWidths[0] + colWidths[1], currentY, colWidths[2], colorRowHeight, "S")
-    doc.rect(margin + colWidths[0] + colWidths[1] + colWidths[2], currentY, colWidths[3], colorRowHeight, "S")
-    
-    // Número
-    doc.setFontSize(9)
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(60, 60, 60)
-    doc.text((index + 1).toString(), margin + 8, currentY + 16)
-    
-    // Muestra de color
-    const rgb = hexToRgb(color)
-    doc.setFillColor(rgb[0], rgb[1], rgb[2])
-    doc.rect(margin + colWidths[0] + 8, currentY + 6, 35, 13, "F")
-    doc.setDrawColor(150, 150, 150)
-    doc.setLineWidth(0.5)
-    doc.rect(margin + colWidths[0] + 8, currentY + 6, 35, 13, "S")
-    
-    // Código del color
-    doc.setFontSize(9)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(40, 40, 40)
-    doc.text(color.toUpperCase(), margin + colWidths[0] + colWidths[1] + 5, currentY + 16)
-    
-    // Uso recomendado
-    const uses = ["Principal", "Secundario", "Acento", "Datos", "Auxiliar", "Extra", "Complemento", "Adicional"]
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(80, 80, 80)
-    doc.text(uses[index] || "Color Adicional", margin + colWidths[0] + colWidths[1] + colWidths[2] + 5, currentY + 16)
-  })
-
-  yPosition += colorsToShow.length * colorRowHeight + 30
-
-  addFooter()
-
-  // ====== PÁGINA 3: GRÁFICOS Y VARIABLES ======
-  doc.addPage()
-  addHeader("Gráficos y Variables", 3)
-
-  // Sección de gráficos
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(primaryR, primaryG, primaryB)
-  doc.text("Componentes del Dashboard", margin, yPosition)
-  yPosition += 20
-
-  // Lista de gráficos más compacta
-  const chartsToShow = combinations.slice(0, 12) // Mostrar hasta 12 gráficos
-  
-  chartsToShow.forEach((chart, index) => {
-    checkPageBreak(22)
-    
-    // Fondo alternado para cada ítem
-    if (index % 2 === 0) {
-      doc.setFillColor(248, 249, 250)
-      doc.rect(margin, yPosition - 2, pageWidth - (margin * 2), 18, "F")
-    }
-    
-    // Bullet point visual con color de la paleta
-    const bulletColor = variant.palette.colors[index % variant.palette.colors.length]
-    const rgb = hexToRgb(bulletColor)
-    doc.setFillColor(rgb[0], rgb[1], rgb[2])
-    doc.rect(margin + 3, yPosition + 4, 4, 4, "F")
-    
-    // Nombre del gráfico
-    doc.setFontSize(10)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(40, 40, 40)
-    doc.text(`${chart.name || `Gráfico ${index + 1}`}`, margin + 12, yPosition + 8)
-    
-    // Información del gráfico
-    doc.setFontSize(8)
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(120, 120, 120)
-    const chartType = chart.chartType || "chart"
-    const variables = []
-    if (chart.numericVariable?.name) variables.push(chart.numericVariable.name)
-    if (chart.categoricalVariable?.name) variables.push(chart.categoricalVariable.name)
-    const variablesText = variables.length > 0 ? variables.join(" × ") : 'N/A'
-    doc.text(`${chartType} • ${variablesText}`, margin + 12, yPosition + 14)
-    
-    yPosition += 20
-  })
-
-  yPosition += 25
-
-  // Sección de variables
-  checkPageBreak(40)
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(primaryR, primaryG, primaryB)
-  doc.text("Variables de Datos", margin, yPosition)
-  yPosition += 20
-
-  // Tabla de variables más organizada
-  if (variables.length > 0) {
-    const varTableWidth = pageWidth - (margin * 2)
-    const varRowHeight = 16
-    const varColWidths = [varTableWidth * 0.4, varTableWidth * 0.3, varTableWidth * 0.3]
-
-    // Header de tabla de variables
-    doc.setFillColor(primaryR, primaryG, primaryB)
-    doc.rect(margin, yPosition, varTableWidth, varRowHeight, "F")
-    
-    doc.setFontSize(9)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(255, 255, 255)
-    doc.text("Nombre", margin + 5, yPosition + 11)
-    doc.text("Tipo", margin + varColWidths[0] + 5, yPosition + 11)
-    doc.text("Uso", margin + varColWidths[0] + varColWidths[1] + 5, yPosition + 11)
-    
-    yPosition += varRowHeight
-
-    // Lista de variables más compacta
-    variables.slice(0, 15).forEach((variable, index) => {
-      checkPageBreak(varRowHeight + 5)
-      
-      // Fondo alternado
-      if (index % 2 === 0) {
-        doc.setFillColor(248, 249, 250)
-        doc.rect(margin, yPosition, varTableWidth, varRowHeight, "F")
+  function table<Row>(columns: Column<Row>[], rows: Row[]) {
+    const rowHeight = 8
+    const header = () => {
+      fill(SURFACE)
+      doc.rect(MARGIN, y, contentWidth, rowHeight, "F")
+      font(7.5, "bold")
+      ink(MUTED)
+      let x = MARGIN
+      for (const column of columns) {
+        const label = fit(column.header.toUpperCase(), column.width - 4)
+        if (column.align === "right") doc.text(label, x + column.width - 2, y + 5.2, { align: "right" })
+        else doc.text(label, x + 2, y + 5.2)
+        x += column.width
       }
-      
-      // Bordes
-      doc.setDrawColor(220, 220, 220)
-      doc.setLineWidth(0.2)
-      doc.rect(margin, yPosition, varColWidths[0], varRowHeight, "S")
-      doc.rect(margin + varColWidths[0], yPosition, varColWidths[1], varRowHeight, "S")
-      doc.rect(margin + varColWidths[0] + varColWidths[1], yPosition, varColWidths[2], varRowHeight, "S")
-      
-      // Nombre de variable
-      doc.setFontSize(8)
-      doc.setFont("helvetica", "bold")
-      doc.setTextColor(40, 40, 40)
-      doc.text(variable.name, margin + 5, yPosition + 11)
-      
-      // Tipo de variable con color
-      doc.setFont("helvetica", "normal")
-      const typeColors = {
-        'numeric': [52, 152, 219],
-        'categorical': [46, 204, 113],
-        'temporal': [155, 89, 182]
-      }
-      const typeColor = typeColors[variable.type as keyof typeof typeColors] || [149, 165, 166]
-      doc.setTextColor(typeColor[0], typeColor[1], typeColor[2])
-      
-      const typeLabels = {
-        'numeric': 'Numérica',
-        'categorical': 'Categórica',
-        'temporal': 'Temporal'
-      }
-      const typeLabel = typeLabels[variable.type as keyof typeof typeLabels] || 'Desconocido'
-      doc.text(typeLabel, margin + varColWidths[0] + 5, yPosition + 11)
-      
-      // Uso/Propósito
-      doc.setTextColor(80, 80, 80)
-      const usage = variable.type === 'numeric' ? 'Medición' : 
-                   variable.type === 'categorical' ? 'Agrupación' : 
-                   variable.type === 'temporal' ? 'Tiempo' : 'General'
-      doc.text(usage, margin + varColWidths[0] + varColWidths[1] + 5, yPosition + 11)
-      
-      yPosition += varRowHeight
+      y += rowHeight
+    }
+    header()
+    rows.forEach((row) => {
+      if (ensureSpace(rowHeight)) header()
+      let x = MARGIN
+      columns.forEach((column, index) => {
+        font(9, index === 0 ? "bold" : "normal")
+        ink(index === 0 ? INK : "#334155")
+        let textX = x + 2
+        let room = column.width - 4
+        const chip = column.chip?.(row)
+        if (chip) {
+          fill(chip)
+          doc.roundedRect(textX, y + 2.4, 3.2, 3.2, 0.8, 0.8, "F")
+          textX += 5
+          room -= 5
+        }
+        const value = fit(column.value(row), room)
+        if (column.align === "right") doc.text(value, x + column.width - 2, y + 5.4, { align: "right" })
+        else doc.text(value, textX, y + 5.4)
+        x += column.width
+      })
+      stroke(LINE)
+      doc.setLineWidth(0.15)
+      doc.line(MARGIN, y + rowHeight, right, y + rowHeight)
+      y += rowHeight
     })
-
-    yPosition += 10
-  } else {
-    doc.setFontSize(10)
-    doc.setFont("helvetica", "normal")
-    doc.setTextColor(120, 120, 120)
-    doc.text("No hay variables configuradas", margin, yPosition)
-    yPosition += 20
   }
 
-  addFooter()
+  const paletteColor = (index: number) => variant.palette.colors[index % variant.palette.colors.length] || BRAND
 
-  // ====== PÁGINA 4: LAYOUT VISUAL (LANDSCAPE) ======
-  doc.addPage("l")
-  const lsWidth = doc.internal.pageSize.getHeight()
-  const lsHeight = doc.internal.pageSize.getWidth()
-  
-  // Header en landscape con mejor proporción
-  doc.setFillColor(primaryR, primaryG, primaryB)
-  doc.rect(0, 0, lsWidth, 30, "F")
-  
-  doc.setFontSize(16)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(255, 255, 255)
-  doc.text("Visualización del Layout", 15, 20)
-  
-  doc.setFontSize(10)
-  doc.text(`${variant.layout} - ${combinations.length} componentes`, lsWidth - 150, 20)
-  
-  // Grid que refleja la distribución real del layout del usuario - ULTRA COMPACTO HORIZONTAL
-  const gridMargin = 20
-  const maxGridWidth = 120 // Ancho MUCHO más pequeño
-  const gridWidth = Math.min(lsWidth - 60, maxGridWidth) // Dejar más margen
-  const gridX = gridMargin + 10 // Comenzar más cerca del margen izquierdo
-  const gridY = 50
-  const gridHeight = 80 // Altura también reducida
+  /* ---------- Page 1: summary ---------- */
+  drawLogo(MARGIN, MARGIN, 9)
+  font(11, "bold")
+  ink(INK)
+  doc.text("Rapidash", MARGIN + 12, MARGIN + 6)
+  font(9)
+  ink(MUTED)
+  doc.text("Especificación de dashboard", right, MARGIN + 6, { align: "right" })
+  y = MARGIN + 30
 
-  // Obtener el layout exacto seleccionado por el usuario
-  const userLayout = variant.layout || 'grid' // Fallback a grid si no está definido
-  
-  // Título del layout - SIEMPRE muestra el layout exacto seleccionado por el usuario
-  doc.setFontSize(12)
-  doc.setFont("helvetica", "bold")
-  doc.setTextColor(primaryR, primaryG, primaryB)
-  const layoutName = userLayout.charAt(0).toUpperCase() + userLayout.slice(1)
-  doc.text(`Layout: ${layoutName} (${combinations.length} componentes)`, gridX, gridY - 10)
+  font(8, "bold")
+  ink(BRAND)
+  doc.text("ESPECIFICACIÓN DE DASHBOARD", MARGIN, y)
+  y += 10
+  font(26, "bold")
+  ink(INK)
+  const titleLines = wrap(shownTitle, contentWidth, 3)
+  doc.text(titleLines, MARGIN, y)
+  y += titleLines.length * 10.5
 
-  // Same divisions as the on-screen preview, from the layout engine
-  const divisions = getRealLayoutDivisions(userLayout, combinations.length).map((d) => ({ x: d.x, y: d.y, w: d.width, h: d.height }))
-  type LayoutDivision = (typeof divisions)[number]
-  const maxRows = Math.max(...divisions.map((d: LayoutDivision) => d.y + d.h))
-  const gridColWidth = gridWidth / 12 // Ancho de columna ULTRA pequeño (120/12 = 10pt por columna)
-  const cellRowHeight = Math.min(25, gridHeight / Math.max(maxRows, 3)) // Altura también reducida
-
-  // Fondo del contenedor
-  doc.setFillColor(248, 249, 250)
-  doc.rect(gridX, gridY, gridWidth, gridHeight, "F")
-  doc.setDrawColor(200, 200, 200)
-  doc.setLineWidth(0.5)
-  doc.rect(gridX, gridY, gridWidth, gridHeight, "S")
-
-  // Líneas de guía del grid - MUY SIMPLIFICADAS
-  doc.setDrawColor(240, 240, 240)
-  doc.setLineWidth(0.1)
-  for (let i = 3; i < 12; i += 3) { // Solo cada 3 columnas
-    const x = gridX + (i * gridColWidth)
-    doc.line(x, gridY, x, gridY + gridHeight)
+  if (description.trim()) {
+    font(11)
+    ink(MUTED)
+    const lines = wrap(description.trim(), contentWidth, 8)
+    doc.text(lines, MARGIN, y + 1)
+    y += lines.length * 5.2 + 4
   }
 
-  // Números de columnas - ULTRA SIMPLIFICADO
-  doc.setFontSize(3)
-  doc.setFont("helvetica", "normal")
-  doc.setTextColor(180, 180, 180)
-  for (let i = 3; i <= 12; i += 3) { // Solo cada 3 columnas
-    const x = gridX + ((i - 0.5) * gridColWidth)
-    if (gridColWidth > 3) { // Solo si hay espacio mínimo
-      doc.text(i.toString(), x - 0.5, gridY - 1)
-    }
-  }
-
-  // Renderizar cada componente según su división real - SIEMPRE el mismo número que seleccionó el usuario
-  combinations.forEach((chart, index) => {
-    const division = divisions[index]
-    if (!division) return
-
-    const x = gridX + (division.x * gridColWidth)
-    const y = gridY + (division.y * cellRowHeight)
-    const width = Math.max(6, division.w * gridColWidth - 2) // Ancho ULTRA mínimo
-    const height = Math.max(10, division.h * cellRowHeight - 2) // Alto mínimo reducido
-
-    // Verificar que no se salga del grid
-    if (x + width > gridX + gridWidth || y + height > gridY + gridHeight) return
-
-    // Fondo del componente en gris
-    doc.setFillColor(220, 220, 220)
-    doc.rect(x + 1, y + 1, width, height, "F")
-    
-    // Borde del componente
-    doc.setDrawColor(180, 180, 180)
-    doc.setLineWidth(0.5)
-    doc.rect(x + 1, y + 1, width, height, "S")
-
-    // Solo mostrar el número si el componente es mínimamente visible
-    if (width > 6 && height > 6) {
-      // Número del componente ultra-pequeño
-      doc.setFontSize(3)
-      doc.setFont("helvetica", "bold")
-      doc.setTextColor(255, 255, 255)
-      doc.setFillColor(100, 100, 100)
-      const numSize = Math.min(4, width / 8, height / 4)
-      if (numSize >= 2) {
-        doc.rect(x + 0.5, y + 0.5, numSize, numSize, "F")
-        doc.text(`${index + 1}`, x + 1, y + 2.5)
-      }
-    }
+  // Key facts
+  y += 4
+  const facts: [string, string][] = [
+    ["Tipo de layout", variant.layout],
+    ["Componentes", String(variant.combinations.length)],
+    ["Variables", String(variant.variables.length)],
+    ["Paleta", variant.palette.name],
+  ]
+  const cardGap = 4
+  const cardWidth = (contentWidth - cardGap * (facts.length - 1)) / facts.length
+  facts.forEach(([label, value], index) => {
+    const x = MARGIN + index * (cardWidth + cardGap)
+    fill(SURFACE)
+    stroke(LINE)
+    doc.setLineWidth(0.2)
+    doc.roundedRect(x, y, cardWidth, 22, 2.5, 2.5, "FD")
+    font(7.5, "bold")
+    ink(MUTED)
+    doc.text(fit(label.toUpperCase(), cardWidth - 8), x + 4, y + 7)
+    font(13, "bold")
+    ink(INK)
+    doc.text(fit(value, cardWidth - 8), x + 4, y + 16)
   })
-  
-  // Información adicional más compacta - ajustada para no sobreponerse
-  const infoY = gridY + gridHeight + 10
-  const maxInfoY = lsHeight - 25 // Dejar espacio para el pie de página
-  
-  // Solo mostrar info si hay espacio suficiente
-  if (infoY + 30 < maxInfoY) {
-    // Caja de información más pequeña
-    const infoBoxX = gridX
-    const infoBoxY = infoY
-    const infoBoxWidth = gridWidth
-    const infoBoxHeight = 25 // Altura reducida
-    
-    doc.setFillColor(248, 250, 252)
-    doc.rect(infoBoxX, infoBoxY, infoBoxWidth, infoBoxHeight, "F")
-    doc.setDrawColor(primaryR, primaryG, primaryB)
-    doc.setLineWidth(0.5)
-    doc.rect(infoBoxX, infoBoxY, infoBoxWidth, infoBoxHeight, "S")
-    
-    // Información en una sola línea compacta
-    doc.setFontSize(9)
-    doc.setFont("helvetica", "bold")
-    doc.setTextColor(primaryR, primaryG, primaryB)
-    const specText = `${variant.layout.toUpperCase()} • ${combinations.length} componentes • Grid 12 col • ${variant.palette.name}`
-    doc.text(specText, infoBoxX + 10, infoBoxY + 16)
+  y += 22 + 6
+
+  // Palette strip
+  const strip = variant.palette.colors.length || 1
+  variant.palette.colors.forEach((color, index) => {
+    fill(color)
+    doc.rect(MARGIN + (contentWidth / strip) * index, y, contentWidth / strip, 3, "F")
+  })
+  y += 14
+
+  // Index: entries now, page numbers once every section has been drawn.
+  font(12, "bold")
+  ink(INK)
+  doc.text("Contenido", MARGIN, y)
+  y += 4
+  const indexRows = SECTIONS.map((section, index) => {
+    const rowY = y + 7 + index * 9
+    font(10, "bold")
+    ink(BRAND)
+    doc.text(String(index + 1).padStart(2, "0"), MARGIN, rowY)
+    font(10)
+    ink(INK)
+    doc.text(section, MARGIN + 9, rowY)
+    stroke(LINE)
+    doc.setLineWidth(0.15)
+    doc.line(MARGIN, rowY + 3, right, rowY + 3)
+    return { section, rowY }
+  })
+
+  /* ---------- Sections ---------- */
+  sectionHeading("Layout", variant.layoutDescription || undefined)
+  const diagramArea: Area = { x: MARGIN, y, width: contentWidth, height: FOOTER_TOP - 14 - y }
+  const boxes = diagramBoxes(variant.layout, variant.combinations.length, diagramArea)
+  boxes.forEach((box) => {
+    const color = paletteColor(box.number - 1)
+    fill(color)
+    doc.roundedRect(box.x, box.y, box.width, box.height, 1.6, 1.6, "F")
+    font(box.height > 12 && box.width > 14 ? 11 : 8, "bold")
+    ink(readableTextColor(color))
+    doc.text(String(box.number), box.x + 2.5, box.y + (box.height > 12 ? 6 : 4.5))
+  })
+  const diagramBottom = boxes.length ? Math.max(...boxes.map((b) => b.y + b.height)) : y
+  y = diagramBottom + 6
+  font(8.5)
+  ink(MUTED)
+  doc.text(
+    fit(`Grilla de 12 columnas · ${variant.combinations.length} componentes · la tabla de componentes detalla cada número`, contentWidth),
+    MARGIN,
+    y,
+  )
+
+  sectionHeading("Componentes", "Cada número corresponde a una caja del diagrama de layout. El tamaño se expresa en columnas × filas de la grilla.")
+  table(
+    [
+      { header: "#", width: 14, value: (r) => String(r.number), chip: (r) => paletteColor(r.number - 1) },
+      { header: "Componente", width: 58, value: (r) => r.name },
+      { header: "Gráfico", width: 36, value: (r) => r.chart },
+      { header: "Variables", width: 46, value: (r) => r.variables },
+      { header: "Tamaño", width: contentWidth - 154, value: (r) => r.size, align: "right" },
+    ],
+    componentRows(variant),
+  )
+
+  sectionHeading("Variables", "Variables configuradas, con su tipo, prioridad y la cantidad de componentes que las usan.")
+  table(
+    [
+      { header: "Variable", width: 70, value: (r) => r.name },
+      { header: "Tipo", width: 46, value: (r) => r.type },
+      { header: "Prioridad", width: 28, value: (r) => r.priority },
+      { header: "Usada en", width: contentWidth - 144, value: (r) => String(r.usedIn), align: "right" },
+    ],
+    variableRows(variant),
+  )
+
+  sectionHeading("Paleta de colores", variant.palette.description || undefined)
+  const modes: [string, string[]][] = [["Modo claro", variant.palette.colors]]
+  if (variant.palette.darkColors?.length) modes.push(["Modo oscuro", variant.palette.darkColors])
+  for (const [mode, colors] of modes) {
+    ensureSpace(48)
+    font(10, "bold")
+    ink(INK)
+    doc.text(mode, MARGIN, y + 4)
+    y += 8
+    const perRow = 5
+    const gap = 4
+    const swatchWidth = (contentWidth - gap * (perRow - 1)) / perRow
+    colors.forEach((color, index) => {
+      if (index > 0 && index % perRow === 0) y += 38
+      if (index % perRow === 0) ensureSpace(38)
+      const x = MARGIN + (index % perRow) * (swatchWidth + gap)
+      fill(color)
+      doc.roundedRect(x, y, swatchWidth, 18, 2, 2, "F")
+      font(8.5, "bold")
+      ink(INK)
+      doc.text(fit(PALETTE_ROLES[index] ?? `Color ${index + 1}`, swatchWidth), x, y + 23)
+      font(8)
+      ink(MUTED)
+      doc.text(fit(color.toUpperCase(), swatchWidth), x, y + 27.5)
+      doc.text(fit(`RGB ${rgb(color).join(", ")}`, swatchWidth), x, y + 31.5)
+    })
+    y += 42
   }
 
-  // Footer landscape más elegante
-  doc.setDrawColor(200, 200, 200)
-  doc.setLineWidth(0.5)
-  doc.line(15, lsHeight - 12, lsWidth - 15, lsHeight - 12)
-  
-  doc.setFontSize(8)
-  doc.setFont("helvetica", "normal")
-  doc.setTextColor(100, 100, 100)
-  doc.text(`Dashboard Layout - Generado el ${new Date().toLocaleDateString("es-ES")} - Dashboard Generator`, 15, lsHeight - 5)
-  doc.text("Página 4", lsWidth - 30, lsHeight - 5)
+  /* ---------- Index page numbers and footers, now that the page count is known ---------- */
+  doc.setPage(1)
+  for (const { section, rowY } of indexRows) {
+    font(10)
+    ink(MUTED)
+    doc.text(String(sectionPages.get(section) ?? ""), right, rowY, { align: "right" })
+  }
 
-  // Guardar PDF
-  const fileName = dashboardTitle 
-    ? `dashboard-${dashboardTitle.toLowerCase().replace(/\s+/g, "-")}.pdf`
-    : "dashboard-specification.pdf"
-  
-  doc.save(fileName)
+  const total = doc.getNumberOfPages()
+  for (let page = 1; page <= total; page++) {
+    doc.setPage(page)
+    stroke(LINE)
+    doc.setLineWidth(0.2)
+    doc.line(MARGIN, FOOTER_TOP, right, FOOTER_TOP)
+    font(8)
+    ink(MUTED)
+    doc.text(`Generado el ${generatedOn} con Rapidash`, MARGIN, FOOTER_TOP + 5)
+    doc.text(`Página ${page} de ${total}`, right, FOOTER_TOP + 5, { align: "right" })
+  }
+
+  doc.save(pdfFileName(title))
 }
