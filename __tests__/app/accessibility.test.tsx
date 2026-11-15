@@ -59,15 +59,16 @@ describe('accessibility', () => {
     expect(await violations(container)).toEqual([])
   })
 
-  it('names icon-only delete buttons and keeps them visible on keyboard focus', () => {
+  it('names icon-only delete buttons, hides them only for a mouse and shows them on keyboard focus and touch screens', () => {
     setState({ showLanding: false, variables, currentVariant: variant, generationHistory: [variant] })
     render(<DashboardGenerator />)
 
     const deleteVariable = screen.getByRole('button', { name: 'Eliminar variable Ventas' })
     const deleteLayout = screen.getAllByRole('button', { name: 'Eliminar layout' })[0]
     for (const button of [deleteVariable, deleteLayout]) {
-      expect(button.className).toContain('opacity-0')
-      expect(button.className).toContain('focus-visible:opacity-100')
+      const classes = button.className.split(/\s+/)
+      expect(classes).not.toContain('opacity-0')
+      expect(classes).toEqual(expect.arrayContaining(['pointer-fine:opacity-0', 'pointer-fine:group-hover:opacity-100', 'focus-visible:opacity-100']))
     }
   })
 

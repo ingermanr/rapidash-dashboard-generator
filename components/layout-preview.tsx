@@ -36,7 +36,7 @@ export function LayoutPreview({ variant, index, onSelect, onDelete, onRegenerate
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-1.5 top-1.5 z-10 h-6 w-6 rounded-full bg-background/80 opacity-0 shadow-sm backdrop-blur-sm transition-opacity hover:bg-destructive hover:text-destructive-foreground group-hover:opacity-100 focus-visible:opacity-100"
+        className="absolute right-1.5 top-1.5 z-10 h-6 w-6 rounded-full bg-background/80 shadow-sm backdrop-blur-sm transition-opacity hover:bg-destructive hover:text-destructive-foreground pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 focus-visible:opacity-100"
         onClick={handleDelete}
         title="Eliminar layout"
         aria-label="Eliminar layout"
