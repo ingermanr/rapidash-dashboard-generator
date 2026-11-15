@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { BarChart3, Download, Filter, Shuffle, TrendingUp, X } from "lucide-react"
+import { BarChart3, Download, Filter, Loader2, Shuffle, TrendingUp, X } from "lucide-react"
 import { DashboardGrid } from "@/components/dashboard-preview/dashboard-grid"
 import { FilterCard } from "@/components/dashboard-preview/filter-card"
 import { PreviewFiltersProvider } from "@/components/dashboard-preview/preview-filters"
@@ -67,7 +67,11 @@ export function DashboardDetailedPreview({
 
   const { toast } = useToast()
 
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
+
   const handleDownloadPDF = async () => {
+    if (isExportingPdf) return
+    setIsExportingPdf(true)
     try {
       await exportDashboardSpecPdf({ variant, title: dashboardTitle, description: dashboardDescription })
     } catch (error) {
@@ -77,6 +81,8 @@ export function DashboardDetailedPreview({
         title: "No se pudo generar el PDF",
         description: "Ocurrió un error al generar la especificación. Inténtalo de nuevo.",
       })
+    } finally {
+      setIsExportingPdf(false)
     }
   }
 
@@ -136,13 +142,15 @@ export function DashboardDetailedPreview({
                     {combinations.length} Visualizaciones
                   </span>
                 </div>
-                <Button 
-                  onClick={handleDownloadPDF} 
+                <Button
+                  onClick={handleDownloadPDF}
+                  disabled={isExportingPdf}
+                  aria-busy={isExportingPdf}
                   size="sm"
                   className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold shadow-md hover:shadow-lg transition-all duration-200 gap-1.5 px-4 text-xs"
                 >
-                  <Download className="h-3 w-3" />
-                  Descargar PDF
+                  {isExportingPdf ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> : <Download className="h-3 w-3" />}
+                  {isExportingPdf ? "Generando PDF…" : "Descargar PDF"}
                 </Button>
               </div>
             </div>
