@@ -11,12 +11,16 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { VariableInput } from "@/components/variable-input"
 import { generateSingleLayoutVariant } from "@/lib/domain/variant-generator"
+import { useToast } from "@/hooks/use-toast"
 import { useDashboardInfo, useDashboardStore, useLayouts, useVariables } from "@/store"
 
 export interface BuilderViewProps {
   onStartOver: () => void
   onShowDashboards: () => void
 }
+
+const NO_CHARTS_MESSAGE =
+  "Estas variables no permiten armar ningún gráfico. Agrega una variable numérica, de porcentaje o categórica, o revisa las combinaciones excluidas."
 
 /** Main workspace: define variables, generate layout variants and browse the history. */
 export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps) {
@@ -33,6 +37,7 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
     regenerateVariantPalette,
   } = useLayouts()
   const { dashboardTitle, dashboardDescription, setDashboardTitle, setDashboardDescription } = useDashboardInfo()
+  const { toast } = useToast()
 
   const pendingGeneration = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -56,11 +61,23 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
       // Read the store when the layout is produced: the variables may have changed during the wait.
       const { variables, generationHistory, excludedCombinations } = useDashboardStore.getState()
       const newVariant = generateSingleLayoutVariant(variables, generationHistory, excludedCombinations)
+      if (newVariant.combinations.length === 0) {
+        setIsGenerating(false)
+        toast({
+          variant: "destructive",
+          title: "No se pudo generar el layout",
+          description: NO_CHARTS_MESSAGE,
+        })
+        return
+      }
       setCurrentVariant(newVariant)
       addToHistory(newVariant)
       setIsGenerating(false)
     }, 800)
-  }, [setIsGenerating, setCurrentVariant, addToHistory])
+  }, [setIsGenerating, setCurrentVariant, addToHistory, toast])
+
+  // Every layout except the one shown as current, newest first.
+  const previousVariants = generationHistory.filter((v) => v.id !== currentVariant?.id).reverse()
 
   const deleteVariant = useCallback((variantId: string) => {
     removeFromHistory(variantId)
@@ -278,7 +295,7 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
         )}
 
         {/* Enhanced Generation History */}
-        {generationHistory.length > 1 && (
+        {previousVariants.length > 0 && (
           <div className="rounded-2xl border border-border/50 bg-gradient-to-br from-card/30 to-card/10 p-8 backdrop-blur-sm">
             <div className="mb-8 flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-chart-2/20 to-chart-3/10 shadow-lg">
@@ -287,16 +304,13 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
               <div>
                 <h2 className="text-2xl font-bold text-foreground">Historial de Generaciones</h2>
                 <p className="text-muted-foreground">
-                  {generationHistory.length - 1}{" "}
-                  {generationHistory.length - 1 === 1 ? "variante anterior disponible" : "variantes anteriores disponibles"}
+                  {previousVariants.length}{" "}
+                  {previousVariants.length === 1 ? "variante anterior disponible" : "variantes anteriores disponibles"}
                 </p>
               </div>
             </div>
             <div className="grid gap-6 lg:grid-cols-2">
-              {generationHistory
-                .slice(0, -1)
-                .reverse()
-                .map((variant, index) => (
+              {previousVariants.map((variant, index) => (
                   <LayoutPreview
                     key={variant.id}
                     variant={variant}

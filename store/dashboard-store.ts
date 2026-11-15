@@ -126,7 +126,9 @@ export const useDashboardStore = create<DashboardState>()(
       })),
       
       removeVariable: (variableId) => set((state) => ({
-        variables: state.variables.filter(v => v.id !== variableId)
+        variables: state.variables.filter(v => v.id !== variableId),
+        // An exclusion that mentions a removed variable can never match again.
+        excludedCombinations: state.excludedCombinations.filter(e => !e.variableIds.includes(variableId)),
       })),
       
       updateVariable: (variableId, updates) => set((state) => ({
@@ -177,12 +179,16 @@ export const useDashboardStore = create<DashboardState>()(
         }
       }),
       
-      removeFromHistory: (variantId) => set((state) => ({
-        generationHistory: state.generationHistory.filter(v => v.id !== variantId),
-        // Si el variant eliminado era el seleccionado, limpiar selección
-        selectedVariant: state.selectedVariant?.id === variantId ? null : state.selectedVariant,
-        currentVariant: state.currentVariant?.id === variantId ? null : state.currentVariant,
-      })),
+      removeFromHistory: (variantId) => set((state) => {
+        const generationHistory = state.generationHistory.filter(v => v.id !== variantId)
+        return {
+          generationHistory,
+          selectedVariant: state.selectedVariant?.id === variantId ? null : state.selectedVariant,
+          // Deleting the current layout promotes the newest one left, so no layout is hidden.
+          currentVariant:
+            state.currentVariant?.id === variantId ? generationHistory.at(-1) ?? null : state.currentVariant,
+        }
+      }),
       
       regenerateVariantPalette: (variantId) => set((state) => {
         const source =
