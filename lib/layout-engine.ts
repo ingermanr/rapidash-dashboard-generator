@@ -1032,7 +1032,7 @@ export function getGridDimensions(divisions: LayoutDivision[]) {
 /**
  * Función para validar que las divisiones sean válidas
  */
-export function validateLayoutDivisions(divisions: LayoutDivision[]): boolean {
+function validateLayoutDivisions(divisions: LayoutDivision[]): boolean {
   return divisions.every(division => {
     return (
       division.x >= 0 &&

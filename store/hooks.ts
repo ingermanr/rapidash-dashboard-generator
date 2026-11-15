@@ -16,24 +16,8 @@ export const useVariables = () => {
   const clearExcludedCombinations = useDashboardStore((state) => state.clearExcludedCombinations)
   const isCombinationExcluded = useDashboardStore((state) => state.isCombinationExcluded)
 
-  // Funciones de conveniencia
-  const getVariableById = (id: string) => variables.find(v => v.id === id)
-  
-  const getVariablesByType = (type: string) => variables.filter(v => v.type === type)
-  
   const variableExists = (name: string) => 
     variables.some(v => v.name.toLowerCase() === name.toLowerCase())
-  
-  const getVariableCount = () => variables.length
-  
-  const getNumericVariables = () => variables.filter(v => v.type === 'numeric')
-  
-  const getCategoricalVariables = () => variables.filter(v => v.type === 'categorical')
-  
-  const getVariablesByPriority = () => {
-    const priorityOrder = { 'alta': 1, 'media': 2, 'baja': 3 }
-    return [...variables].sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
-  }
   
   const getPriorityStats = () => {
     const alta = variables.filter(v => v.priority === 'alta').length
@@ -55,19 +39,12 @@ export const useVariables = () => {
     removeExcludedCombination,
     clearExcludedCombinations,
     isCombinationExcluded,
-    // Funciones de conveniencia
-    getVariableById,
-    getVariablesByType,
     variableExists,
-    getVariableCount,
-    getNumericVariables,
-    getCategoricalVariables,
-    getVariablesByPriority,
     getPriorityStats,
   }
 }
 
-// Hook para layouts con funciones de conveniencia
+// Hook para layouts
 export const useLayouts = () => {
   const currentVariant = useDashboardStore((state) => state.currentVariant)
   const generationHistory = useDashboardStore((state) => state.generationHistory)
@@ -82,15 +59,6 @@ export const useLayouts = () => {
   const setIsGenerating = useDashboardStore((state) => state.setIsGenerating)
   const clearHistory = useDashboardStore((state) => state.clearHistory)
 
-  // Funciones de conveniencia
-  const getHistoryCount = () => generationHistory.length
-  
-  const getVariantById = (id: string) => generationHistory.find(v => v.id === id)
-  
-  const hasHistory = () => generationHistory.length > 0
-  
-  const getLatestVariant = () => 
-    generationHistory.length > 0 ? generationHistory[generationHistory.length - 1] : null
 
   return {
     currentVariant,
@@ -104,11 +72,6 @@ export const useLayouts = () => {
     setSelectedVariant,
     setIsGenerating,
     clearHistory,
-    // Funciones de conveniencia
-    getHistoryCount,
-    getVariantById,
-    hasHistory,
-    getLatestVariant,
   }
 }
 
@@ -123,11 +86,6 @@ export const useDashboardInfo = () => {
   const setShowLanding = useDashboardStore((state) => state.setShowLanding)
   const reset = useDashboardStore((state) => state.reset)
 
-  // Funciones de conveniencia
-  const hasTitle = () => dashboardTitle.trim().length > 0
-  const hasDescription = () => dashboardDescription.trim().length > 0
-  const isComplete = () => hasTitle() && hasDescription()
-
   return {
     dashboardTitle,
     dashboardDescription,
@@ -136,9 +94,5 @@ export const useDashboardInfo = () => {
     setDashboardDescription,
     setShowLanding,
     reset,
-    // Funciones de conveniencia
-    hasTitle,
-    hasDescription,
-    isComplete,
   }
 }
