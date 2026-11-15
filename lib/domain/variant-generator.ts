@@ -1,4 +1,6 @@
 import type { Variable, LayoutVariant, VariableCombination, ExcludedCombination } from "@/types/dashboard"
+import { getRealLayoutDivisions } from "@/lib/layout-engine"
+import { recommendChart } from "./chart-recommendation"
 import { pickPalette } from "./palettes"
 import type { RandomSource } from "./random"
 
@@ -87,15 +89,10 @@ export function generateCombinations(
   { random, now }: GeneratorDeps = defaultDeps,
 ): VariableCombination[] {
   const combinations: VariableCombination[] = []
-  
-  // Función helper para verificar si una combinación está excluida
+
   const isCombinationExcluded = (variableIds: string[]): boolean => {
-    return excludedCombinations.some(excluded => {
-      const sortedExcluded = [...excluded.variableIds].sort()
-      const sortedInput = [...variableIds].sort()
-      return sortedExcluded.length === sortedInput.length && 
-             sortedExcluded.every((id, index) => id === sortedInput[index])
-    })
+    const key = [...variableIds].sort().join("|")
+    return excludedCombinations.some((excluded) => [...excluded.variableIds].sort().join("|") === key)
   }
   const numericVars = variables.filter(
     (v) => v.type === "numeric" || v.type === "percentage-progress" || v.type === "percentage-ratio",
@@ -104,159 +101,33 @@ export function generateCombinations(
   const binaryVars = variables.filter((v) => v.type === "binary")
   const temporalVars = variables.filter((v) => v.type === "temporal")
 
-  let barChartIndex = Math.floor(random() * 100) // Start with random index for variety
   let combinationCounter = 0 // Unique counter per generation
 
-  for (const numeric of numericVars) {
-    for (const temporal of temporalVars) {
-      // Temporal variables ONLY get line or area charts for trend visualization
-      const chartTypes: ("line" | "area")[] = ["line", "area"]
-      const randomChartType = chartTypes[Math.floor(random() * chartTypes.length)]
-
-      // Verificar si esta combinación está excluida
-      const combinationVariableIds = [numeric.id, temporal.id]
-      if (!isCombinationExcluded(combinationVariableIds)) {
-        combinations.push({
-          id: `combo-${now()}-${combinationCounter++}-${Math.floor(random() * 10000)}`,
-          numericVariable: numeric,
-          categoricalVariable: temporal,
-          name: `${numeric.name} en ${temporal.name}`,
-          chartType: randomChartType,
-        })
-      }
+  /** Adds a combination unless excluded. Its chart is provisional until the layout places it in a cell. */
+  const add = (measure: Variable, partner: Variable | undefined, name: string) => {
+    const variableIds = partner ? [measure.id, partner.id] : [measure.id]
+    if (isCombinationExcluded(variableIds)) return
+    const combination: VariableCombination = {
+      id: `combo-${now()}-${combinationCounter++}-${Math.floor(random() * 10000)}`,
+      numericVariable: measure,
+      ...(partner ? { categoricalVariable: partner } : {}),
+      name,
+      chartType: "metric",
     }
+    combination.chartType = recommendChart(combination)
+    combinations.push(combination)
   }
 
-  for (const numeric of numericVars) {
-    for (const categorical of categoricalVars) {
-      let chartType: VariableCombination["chartType"]
-
-      if (numeric.type === "percentage-progress") {
-        chartType = "progress"
-      } else if (numeric.type === "percentage-ratio") {
-        // Ratio percentages work well with pie/donut charts
-        chartType = barChartIndex % 2 === 0 ? "pie" : "donut"
-        barChartIndex++
-      } else {
-        // Ensure mix of bar and horizontal-bar charts for numeric variables
-        if (barChartIndex % 5 === 0) {
-          chartType = "bar"
-        } else if (barChartIndex % 5 === 1) {
-          chartType = "horizontal-bar"
-        } else if (barChartIndex % 5 === 2) {
-          chartType = "pie"
-        } else if (barChartIndex % 5 === 3) {
-          chartType = "donut"
-        } else {
-          chartType = "radial"
-        }
-        barChartIndex++
-      }
-
-      // Verificar si esta combinación está excluida
-      const combinationVariableIds = [numeric.id, categorical.id]
-      if (!isCombinationExcluded(combinationVariableIds)) {
-        combinations.push({
-          id: `combo-${now()}-${combinationCounter++}-${Math.floor(random() * 10000)}`,
-          numericVariable: numeric,
-          categoricalVariable: categorical,
-          name: `${numeric.name} por ${categorical.name}`,
-          chartType: chartType,
-        })
-      }
-    }
-  }
-
-  for (const numeric of numericVars) {
-    for (const binary of binaryVars) {
-      let chartType: VariableCombination["chartType"]
-
-      if (numeric.type === "percentage-progress") {
-        chartType = "progress"
-      } else if (numeric.type === "percentage-ratio") {
-        // Binary ratios work well with pie/donut (2 segments)
-        chartType = barChartIndex % 2 === 0 ? "pie" : "donut"
-        barChartIndex++
-      } else {
-        // Binary comparisons work well with bar charts (2 bars) or pie charts (2 segments)
-        if (barChartIndex % 3 === 0) {
-          chartType = "bar"
-        } else if (barChartIndex % 3 === 1) {
-          chartType = "horizontal-bar"
-        } else {
-          chartType = "pie"
-        }
-        barChartIndex++
-      }
-
-      // Verificar si esta combinación está excluida
-      const combinationVariableIds = [numeric.id, binary.id]
-      if (!isCombinationExcluded(combinationVariableIds)) {
-        combinations.push({
-          id: `combo-${now()}-${combinationCounter++}-${Math.floor(random() * 10000)}`,
-          numericVariable: numeric,
-          categoricalVariable: binary,
-          name: `${numeric.name} por ${binary.name}`,
-          chartType: chartType,
-        })
-      }
-    }
-  }
+  for (const numeric of numericVars) for (const temporal of temporalVars) add(numeric, temporal, `${numeric.name} en ${temporal.name}`)
+  for (const numeric of numericVars) for (const categorical of categoricalVars) add(numeric, categorical, `${numeric.name} por ${categorical.name}`)
+  for (const numeric of numericVars) for (const binary of binaryVars) add(numeric, binary, `${numeric.name} por ${binary.name}`)
 
   if (categoricalVars.length === 0 && binaryVars.length === 0 && temporalVars.length === 0) {
-    for (const numeric of numericVars) {
-      const chartType = numeric.type === "percentage-progress" ? "progress" : "metric"
-
-      // Verificar si esta combinación está excluida
-      const combinationVariableIds = [numeric.id]
-      if (!isCombinationExcluded(combinationVariableIds)) {
-        combinations.push({
-          id: `combo-${now()}-${combinationCounter++}-${Math.floor(random() * 10000)}`,
-          numericVariable: numeric,
-          name: numeric.name,
-          chartType: chartType,
-        })
-      }
-    }
+    for (const numeric of numericVars) add(numeric, undefined, numeric.name)
   }
-
-  if (categoricalVars.length > 0 && numericVars.length === 0) {
-    for (const categorical of categoricalVars) {
-      // Cycle through pie, donut, and radial for standalone categorical
-      const chartTypes: ("pie" | "donut" | "radial")[] = ["pie", "donut", "radial"]
-      const chartType = chartTypes[barChartIndex % 3]
-      barChartIndex++
-
-      // Verificar si esta combinación está excluida
-      const combinationVariableIds = [categorical.id]
-      if (!isCombinationExcluded(combinationVariableIds)) {
-        combinations.push({
-          id: `combo-${now()}-${combinationCounter++}-${Math.floor(random() * 10000)}`,
-          numericVariable: categorical,
-          name: `Distribución de ${categorical.name}`,
-          chartType: chartType,
-        })
-      }
-    }
-  }
-
-  if (binaryVars.length > 0 && numericVars.length === 0) {
-    for (const binary of binaryVars) {
-      // Binary variables work well with pie/donut (2 segments)
-      const chartType = barChartIndex % 2 === 0 ? "pie" : "donut"
-      barChartIndex++
-
-      // Verificar si esta combinación está excluida
-      const combinationVariableIds = [binary.id]
-      if (!isCombinationExcluded(combinationVariableIds)) {
-        combinations.push({
-          id: `combo-${now()}-${combinationCounter++}-${Math.floor(random() * 10000)}`,
-          numericVariable: binary,
-          name: `Distribución de ${binary.name}`,
-          chartType: chartType,
-        })
-      }
-    }
+  if (numericVars.length === 0) {
+    for (const categorical of categoricalVars) add(categorical, undefined, `Distribución de ${categorical.name}`)
+    for (const binary of binaryVars) add(binary, undefined, `Distribución de ${binary.name}`)
   }
 
   return combinations
@@ -373,12 +244,19 @@ export function generateSingleLayoutVariant(
 
   const palette = pickPalette(history, random)
 
+  // Now that the layout decides each card's size, pick the chart that reads best in it.
+  const divisions = getRealLayoutDivisions(layout, combinations.length)
+  const placed = combinations.map((combination, index) => ({
+    ...combination,
+    chartType: recommendChart(combination, divisions[index]),
+  }))
+
   return {
     id: `variant-${now()}-${Math.floor(random() * 100000)}`,
     layout,
     palette,
     variables,
-    combinations,
+    combinations: placed,
     layoutDescription: getLayoutDescription(layout, combinations.length),
   }
 }
