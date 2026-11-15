@@ -1,6 +1,8 @@
 "use client"
 
-import { ArrowLeft, Share2, Sparkles } from "lucide-react"
+import { useState } from "react"
+import { ArrowLeft, Share2, Sparkles, WandSparkles } from "lucide-react"
+import { AiHandoffPanel } from "@/components/generator/ai-handoff-panel"
 import { DashboardDetailedPreview } from "@/components/dashboard-detailed-preview"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
@@ -30,6 +32,8 @@ export function VariantDetailView({
   onShare,
   manualShareLink,
 }: VariantDetailViewProps) {
+  const [showAiPanel, setShowAiPanel] = useState(false)
+
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -47,9 +51,21 @@ export function VariantDetailView({
               <Share2 className="h-4 w-4" />
               Compartir
             </Button>
+            <Button
+              onClick={() => setShowAiPanel((open) => !open)}
+              variant="outline"
+              className="gap-2"
+              aria-expanded={showAiPanel}
+              aria-controls="ai-handoff"
+            >
+              <WandSparkles className="h-4 w-4" />
+              Construir con IA
+            </Button>
           </div>
           <ThemeToggle />
         </div>
+
+        {showAiPanel && <AiHandoffPanel id="ai-handoff" variant={variant} title={title} description={description} />}
 
         {manualShareLink && (
           <div className="mb-6 space-y-2 rounded-lg border border-border bg-card p-4">

@@ -1,4 +1,5 @@
 import { act, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import axe from 'axe-core'
 import DashboardGenerator from '@/app/page'
 import { useDashboardStore } from '@/store'
@@ -56,6 +57,16 @@ describe('accessibility', () => {
     setState(state)
     const { container } = render(<DashboardGenerator />)
     expect(screen.getByRole('main')).toBeInTheDocument()
+    expect(await violations(container)).toEqual([])
+  })
+
+  it('variant detail with the "Construir con IA" panel open has no axe violations', async () => {
+    setState({ showLanding: false, variables, currentVariant: variant, generationHistory: [variant], selectedVariant: variant })
+    const { container } = render(<DashboardGenerator />)
+
+    await userEvent.click(screen.getByRole('button', { name: /Construir con IA/ }))
+
+    expect(screen.getByRole('region', { name: 'Construir con IA' })).toBeInTheDocument()
     expect(await violations(container)).toEqual([])
   })
 
