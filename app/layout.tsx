@@ -15,11 +15,10 @@ export const metadata: Metadata = {
   publisher: 'Rapidash',
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon-16.svg', type: 'image/svg+xml', sizes: '16x16' },
     ],
-    shortcut: '/favicon.svg',
-    apple: '/apple-touch-icon.svg',
+    apple: { url: '/apple-touch-icon.png', sizes: '180x180' },
   },
   manifest: '/manifest.json',
 }
