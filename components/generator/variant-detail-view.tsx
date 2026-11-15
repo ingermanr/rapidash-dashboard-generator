@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Share2, Sparkles, WandSparkles } from "lucide-react"
+import { ArrowLeft, Palette, Share2, Sparkles, WandSparkles } from "lucide-react"
 import { AiHandoffPanel } from "@/components/generator/ai-handoff-panel"
+import { PaletteCustomizer } from "@/components/generator/palette-customizer"
 import { DashboardDetailedPreview } from "@/components/dashboard-detailed-preview"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { LayoutVariant } from "@/types/dashboard"
+import type { ColorPalette, LayoutVariant } from "@/types/dashboard"
 
 export interface VariantDetailViewProps {
   variant: LayoutVariant
@@ -16,6 +17,8 @@ export interface VariantDetailViewProps {
   onBack: () => void
   onStartOver: () => void
   onRegeneratePalette?: () => void
+  /** Replaces the colours of the shown layout with a palette the user built. */
+  onApplyPalette?: (palette: ColorPalette) => void
   onShare: () => void
   /** Link to copy by hand, shown when the clipboard is not available. */
   manualShareLink?: string | null
@@ -29,10 +32,12 @@ export function VariantDetailView({
   onBack,
   onStartOver,
   onRegeneratePalette,
+  onApplyPalette,
   onShare,
   manualShareLink,
 }: VariantDetailViewProps) {
   const [showAiPanel, setShowAiPanel] = useState(false)
+  const [showPalettePanel, setShowPalettePanel] = useState(false)
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,6 +56,18 @@ export function VariantDetailView({
               <Share2 className="h-4 w-4" />
               Compartir
             </Button>
+            {onApplyPalette && (
+              <Button
+                onClick={() => setShowPalettePanel((open) => !open)}
+                variant="outline"
+                className="gap-2"
+                aria-expanded={showPalettePanel}
+                aria-controls="palette-customizer"
+              >
+                <Palette className="h-4 w-4" />
+                Personalizar colores
+              </Button>
+            )}
             <Button
               onClick={() => setShowAiPanel((open) => !open)}
               variant="outline"
@@ -64,6 +81,18 @@ export function VariantDetailView({
           </div>
           <ThemeToggle />
         </div>
+
+        {showPalettePanel && onApplyPalette && (
+          <PaletteCustomizer
+            id="palette-customizer"
+            initialColor={variant.palette.colors[0] ?? "#0054ee"}
+            onApply={(palette) => {
+              onApplyPalette(palette)
+              setShowPalettePanel(false)
+            }}
+            onCancel={() => setShowPalettePanel(false)}
+          />
+        )}
 
         {showAiPanel && <AiHandoffPanel id="ai-handoff" variant={variant} title={title} description={description} />}
 
