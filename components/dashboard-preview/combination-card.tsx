@@ -14,6 +14,7 @@ import { ProgressBar } from "@/components/dashboard-preview/charts/progress-bar"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { usePaletteColors } from "@/components/dashboard-preview/use-color-mode"
+import { useElementSize } from "@/components/dashboard-preview/use-element-size"
 import type { LayoutVariant, VariableCombination } from "@/types/dashboard"
 
 export interface CombinationCardProps {
@@ -25,6 +26,8 @@ export interface CombinationCardProps {
 
 export function CombinationCard({ combination, palette, index, size }: CombinationCardProps) {
   const colors = usePaletteColors(palette)
+  // Charts scale their text and axes to the room they really get, not to the card's grid columns.
+  const [chartRef, box] = useElementSize<HTMLDivElement>()
   const color = colors[index % colors.length]
 
   return (
@@ -70,26 +73,33 @@ export function CombinationCard({ combination, palette, index, size }: Combinati
         {/* Chart Container - Optimizado para escalado */}
         <div className="flex-1 min-h-0 w-full rounded-lg bg-gradient-to-br from-background/60 to-background/20 backdrop-blur-sm border border-border/30 overflow-hidden">
           <div
+            ref={chartRef}
             role="img"
             aria-label={`Gráfico de ejemplo: ${CHART_TYPE_LABELS[combination.chartType]} de ${combination.name}`}
             className={`w-full h-full ${
               combination.chartType === "progress" || combination.chartType === "metric" ? "p-4" : "p-2"
             }`}
           >
-            {combination.chartType === "bar" && <BarChart color={color} combination={combination} size={size} />}
-            {combination.chartType === "horizontal-bar" && (
-              <HorizontalBarChart color={color} combination={combination} size={size} />
-            )}
-            {combination.chartType === "line" && <LineChart color={color} combination={combination} size={size} />}
-            {combination.chartType === "area" && <AreaChart color={color} combination={combination} size={size} />}
-            {combination.chartType === "pie" && (
-              <PieChart colors={colors} combination={combination} size={size} />
-            )}
-            {combination.chartType === "donut" && (
-              <DonutChart colors={colors} combination={combination} size={size} />
-            )}
-            {combination.chartType === "radial" && (
-              <RadialChart colors={colors} combination={combination} size={size} />
+            {/* Plotted charts wait until the box is measured, so they draw once at the right scale instead of
+                animating from a default size to the real one. */}
+            {box.width > 0 && (
+              <>
+                {combination.chartType === "bar" && <BarChart color={color} combination={combination} size={size} box={box} />}
+                {combination.chartType === "horizontal-bar" && (
+                  <HorizontalBarChart color={color} combination={combination} size={size} box={box} />
+                )}
+                {combination.chartType === "line" && <LineChart color={color} combination={combination} size={size} box={box} />}
+                {combination.chartType === "area" && <AreaChart color={color} combination={combination} size={size} box={box} />}
+                {combination.chartType === "pie" && (
+                  <PieChart colors={colors} combination={combination} size={size} box={box} />
+                )}
+                {combination.chartType === "donut" && (
+                  <DonutChart colors={colors} combination={combination} size={size} box={box} />
+                )}
+                {combination.chartType === "radial" && (
+                  <RadialChart colors={colors} combination={combination} size={size} box={box} />
+                )}
+              </>
             )}
             {combination.chartType === "progress" && (
               <ProgressBar

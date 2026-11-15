@@ -1,6 +1,7 @@
 "use client"
 
 import { Cell, Legend, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip } from "recharts"
+import { chartDensity, type ChartBox } from "@/components/dashboard-preview/charts/chart-scale"
 import { generatePieData } from "@/lib/domain/sample-data"
 import type { VariableCombination } from "@/types/dashboard"
 import { usePreviewFilters } from "@/components/dashboard-preview/preview-filters"
@@ -10,13 +11,16 @@ export function DonutChart({
   colors,
   combination,
   size,
-}: { colors: string[]; combination: VariableCombination; size: "small" | "medium" | "large" }) {
+  box = { width: 0, height: 0 },
+}: { colors: string[]; combination: VariableCombination; size: "small" | "medium" | "large"; box?: ChartBox }) {
   const filters = usePreviewFilters()
   const data = filterChartData(generatePieData(combination, chartRandom(combination.id, filters)), combination, filters)
   // Radios adaptativos basados en porcentaje del contenedor disponible
   const innerRadius = size === "large" ? "40%" : size === "medium" ? "35%" : "30%"
   const outerRadius = size === "large" ? "80%" : size === "medium" ? "70%" : "60%"
   const fontSize = size === "large" ? 12 : size === "medium" ? 11 : 10
+  // A legend needs room: in a compact chart the tooltip names each part instead.
+  const showLegend = chartDensity(box) !== "compact"
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -44,7 +48,7 @@ export function DonutChart({
             color: "hsl(var(--popover-foreground))",
           }}
         />
-        {size !== "small" && (
+        {showLegend && size !== "small" && (
           <Legend
             wrapperStyle={{
               fontSize: `${fontSize}px`,
