@@ -153,7 +153,7 @@ function LayoutVisualization({ layout, combinationCount }: { layout: string; com
           
           return (
             <div
-              key={index}
+              key={`${division.x}-${division.y}`}
               className="rounded-sm border border-border bg-primary/10 min-h-[4px] transition-all hover:bg-primary/20"
               style={gridStyles}
               title={`Elemento ${index + 1}: ${division.width}×${division.height} en (${division.x}, ${division.y})`}
