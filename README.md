@@ -90,6 +90,10 @@ Todo queda en este navegador (`localStorage`), sin cuentas ni servidor.
 - **Compartir**: en la vista detallada, "Compartir" copia un link con la definición y el layout. Viaja en el
   fragmento de la URL (`#share=`), que el navegador nunca envía al servidor, y quien lo abre lo recibe como un
   dashboard nuevo.
+- **Construir con IA**: en la vista detallada, "Construir con IA" prepara un prompt con la especificación del
+  dashboard (contrato JSON versionado: variables, componentes con su posición en la grilla y paleta). Cópialo, o
+  ábrelo directamente en Claude o ChatGPT, adjunta tu archivo de datos y el asistente construye un dashboard web
+  interactivo con tus datos reales. Rapidash no envía tus datos a ningún lado.
 - **Robustez**: si el almacenamiento está lleno o bloqueado, un aviso lo indica; los datos dañados se reparan
   al cargar y el formato guardado tiene versión con migración.
 
@@ -117,9 +121,8 @@ variantes son reproducibles en los tests.
 
 ## Roadmap
 
-- **Construir el dashboard con IA**: conectar la especificación de un dashboard con cualquier proveedor de IA
-  para que el diseño se haga realidad con los datos del usuario. La base es un contrato estable en JSON
-  (variables, tipos, combinaciones, grilla y paleta) y un adaptador por proveedor, sin atar la app a ninguno.
+- **Conexión directa con proveedores de IA**: además del prompt para copiar, llamar al proveedor elegido desde la
+  app con la clave del usuario, sobre el mismo contrato JSON.
 
 ## Licencia
 
