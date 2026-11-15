@@ -66,10 +66,12 @@ describe('generateCombinations', () => {
     }
   })
 
-  it('uses a progress chart for percentage-progress variables', () => {
+  it('shows progress per category as one bar per category, and a lone progress as a meter', () => {
     const progress = variable('completion', 'percentage-progress')
-    const [combination] = generateCombinations([progress, region], [], seededDeps(1))
-    expect(combination.chartType).toBe('progress')
+    const [byRegion] = generateCombinations([progress, region], [], seededDeps(1))
+    expect(byRegion.chartType).toBe('horizontal-bar')
+    const [alone] = generateCombinations([progress], [], seededDeps(1))
+    expect(alone.chartType).toBe('progress')
   })
 
   it('skips excluded pairs regardless of id order', () => {
@@ -89,7 +91,7 @@ describe('generateCombinations', () => {
 
   it('shows standalone distributions for categorical variables without numerics', () => {
     const [combination] = generateCombinations([region], [], seededDeps(1))
-    expect(['pie', 'donut', 'radial']).toContain(combination.chartType)
+    expect(combination.chartType).toBe('horizontal-bar')
     expect(combination.name).toBe('Distribución de region')
   })
 
