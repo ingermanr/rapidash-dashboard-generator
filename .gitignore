@@ -46,3 +46,8 @@ layout-test.js
 
 # documentation backups
 *.md.backup
+# swc cache
+.swc/
+
+# internal development log (kept locally and in Engram)
+/odd/
