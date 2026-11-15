@@ -2,13 +2,14 @@
 
 import { VARIABLE_TYPE_LABELS } from "@/lib/domain/labels"
 import type React from "react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, X, BarChart3, Calendar, Tag, Hash, Type, TrendingUp, ToggleLeft, AlertCircle, EyeOff, Eye, type LucideIcon } from "lucide-react"
-import type { Variable, VariableType, VariablePriority } from "@/types/dashboard"
+import type { VariableType, VariablePriority } from "@/types/dashboard"
+import { combinationKey, suggestCombinations, withExclusions, type SuggestedCombination } from "@/lib/domain/suggested-combinations"
 import { useVariables } from "@/store"
 
 const MIN_VARIABLE_NAME_LENGTH = 2
@@ -40,7 +41,7 @@ export function VariableInput() {
     getPriorityStats,
     addExcludedCombination,
     removeExcludedCombination,
-    isCombinationExcluded
+    excludedCombinations,
   } = useVariables()
   const [name, setName] = useState("")
   const [type, setType] = useState<VariableType>("numeric")
@@ -102,85 +103,24 @@ export function VariableInput() {
     if (error) setError("")
   }
 
-  const handleExcludeCombination = (combo: { text: string; variables: Variable[] }) => {
-    const combinationId = `combo-${combo.variables.map(v => v.id).sort().join('-')}`
-    const variableIds = combo.variables.map(v => v.id)
-    
-    addExcludedCombination({
-      id: combinationId,
-      description: combo.text,
-      variableIds: variableIds
-    })
+  const handleExcludeCombination = (combo: SuggestedCombination) => {
+    addExcludedCombination({ id: combo.id, description: combo.text, variableIds: combo.variableIds })
   }
 
-  const handleIncludeCombination = (combo: { text: string; variables: Variable[] }) => {
-    const combinationId = `combo-${combo.variables.map(v => v.id).sort().join('-')}`
-    removeExcludedCombination(combinationId)
+  const handleIncludeCombination = (combo: SuggestedCombination) => {
+    // Remove every exclusion of this pair, whatever id it was saved under (older or imported data).
+    const key = combinationKey(combo.variableIds)
+    for (const exclusion of excludedCombinations)
+      if (combinationKey(exclusion.variableIds) === key) removeExcludedCombination(exclusion.id)
   }
 
-  const isCombinationCurrentlyExcluded = (combo: { variables: Variable[] }) => {
-    return isCombinationExcluded(combo.variables.map(v => v.id))
-  }
-
-  const numericVars = variables.filter(
-    (v) => v.type === "numeric" || v.type === "percentage-progress" || v.type === "percentage-ratio",
+  // Recomputed only when the variables or exclusions change, not on every keystroke in the name field.
+  const suggestedCombinations = useMemo(() => suggestCombinations(variables), [variables])
+  const markedCombinations = useMemo(
+    () => withExclusions(suggestedCombinations, excludedCombinations),
+    [suggestedCombinations, excludedCombinations],
   )
-  const categoricalVars = variables.filter((v) => v.type === "categorical")
-  const binaryVars = variables.filter((v) => v.type === "binary")
-  const temporalVars = variables.filter((v) => v.type === "temporal")
-
-  // Crear combinaciones con información de prioridad
-  const suggestedCombinations: { text: string; maxPriority: number; variables: Variable[] }[] = []
-  const priorityValue = { 'alta': 1, 'media': 2, 'baja': 3 }
-
-  for (const numeric of numericVars) {
-    for (const categorical of categoricalVars) {
-      const maxPriority = Math.min(priorityValue[numeric.priority], priorityValue[categorical.priority])
-      suggestedCombinations.push({
-        text: `${numeric.name} por ${categorical.name}`,
-        maxPriority,
-        variables: [numeric, categorical]
-      })
-    }
-  }
-
-  for (const numeric of numericVars) {
-    for (const binary of binaryVars) {
-      const maxPriority = Math.min(priorityValue[numeric.priority], priorityValue[binary.priority])
-      suggestedCombinations.push({
-        text: `${numeric.name} por ${binary.name}`,
-        maxPriority,
-        variables: [numeric, binary]
-      })
-    }
-  }
-
-  for (const numeric of numericVars) {
-    for (const temporal of temporalVars) {
-      const maxPriority = Math.min(priorityValue[numeric.priority], priorityValue[temporal.priority])
-      suggestedCombinations.push({
-        text: `${numeric.name} en ${temporal.name}`,
-        maxPriority,
-        variables: [numeric, temporal]
-      })
-    }
-  }
-
-  for (const numeric of numericVars) {
-    if (categoricalVars.length === 0 && binaryVars.length === 0 && temporalVars.length === 0) {
-      suggestedCombinations.push({
-        text: `${numeric.name}`,
-        maxPriority: priorityValue[numeric.priority],
-        variables: [numeric]
-      })
-    }
-  }
-
-  // Ordenar por prioridad (menor valor = mayor prioridad)
-  suggestedCombinations.sort((a, b) => a.maxPriority - b.maxPriority)
-
-  // Filtrar las combinaciones no excluidas para el conteo total - calculado dinámicamente
-  const activeCombinations = suggestedCombinations.filter(combo => !isCombinationCurrentlyExcluded(combo))
+  const activeCombinations = markedCombinations.filter((combo) => !combo.excluded)
   const totalCombinations = activeCombinations.length || variables.length
 
   return (
@@ -421,12 +361,8 @@ export function VariableInput() {
                   </div>
                   
                   <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                    {suggestedCombinations.map((combo, idx) => {
-                      const isExcluded = isCombinationCurrentlyExcluded(combo)
-                      // Calcular el índice de posición para las combinaciones activas
-                      const precedingActiveCombos = suggestedCombinations.slice(0, idx).filter(c => !isCombinationCurrentlyExcluded(c))
-                      const activeIndex = isExcluded ? -1 : precedingActiveCombos.length
-                      
+                    {markedCombinations.map((combo) => {
+                      const isExcluded = combo.excluded
                       const priorityColors = isExcluded ? {
                         1: "border-gray-300 bg-gray-100 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400",
                         2: "border-gray-300 bg-gray-100 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400", 
@@ -439,7 +375,7 @@ export function VariableInput() {
                       
                       return (
                         <div
-                          key={idx}
+                          key={combo.id}
                           className={`flex min-w-0 items-center gap-2 rounded-lg border p-2 transition-all ${priorityColors[combo.maxPriority as keyof typeof priorityColors] || priorityColors[2]} ${isExcluded ? 'opacity-60' : ''}`}
                         >
                           <Button
@@ -459,7 +395,7 @@ export function VariableInput() {
                           <div className="flex items-center gap-1.5 min-w-0 flex-1">
                             {!isExcluded && (
                               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-current/20 text-xs font-bold text-current shrink-0">
-                                {activeIndex + 1}
+                                {combo.activeNumber}
                               </span>
                             )}
                             <span className={`font-medium text-sm truncate ${isExcluded ? 'line-through' : ''}`} title={combo.text}>

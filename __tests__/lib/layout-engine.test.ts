@@ -25,6 +25,26 @@ describe('layout engine coverage', () => {
   })
 })
 
+/** Layouts older versions generated: saved, imported and shared dashboards can still contain them. */
+const LEGACY_LAYOUTS = ['F-Pattern', 'Z-Pattern', 'Dashboard Classic', 'Pinned Sidebar', 'Ultra Dense Grid', 'Adaptive Flow', 'Hierarchical Dense']
+
+describe('legacy layouts', () => {
+  it.each(LEGACY_LAYOUTS)('%s still renders one card per combination, inside the grid and without overlaps', (layout) => {
+    for (let count = 1; count <= 30; count++) {
+      const divisions = getRealLayoutDivisions(layout, count)
+      const quality = analyzeLayoutQuality(divisions)
+      const inside = divisions.every((d) => d.x >= 0 && d.y >= 0 && d.width > 0 && d.height > 0 && d.x + d.width <= 12)
+      expect({ layout, count, divisions: divisions.length, overlaps: quality.hasOverlaps, inside }).toEqual({
+        layout,
+        count,
+        divisions: count,
+        overlaps: false,
+        inside: true,
+      })
+    }
+  })
+})
+
 describe('fillEmptySpace', () => {
   it('stretches a lone card across the full width', () => {
     expect(fillEmptySpace([{ x: 0, y: 0, width: 4, height: 1 }])).toEqual([{ x: 0, y: 0, width: 12, height: 1 }])

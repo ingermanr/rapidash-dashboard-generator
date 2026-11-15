@@ -13,6 +13,7 @@ jest.mock('@/store', () => ({
     addVariable: mockAddVariable,
     removeVariable: mockRemoveVariable,
     variableExists: mockVariableExists,
+    excludedCombinations: [],
   }),
 }))
 

@@ -1,14 +1,16 @@
 import { CHART_TYPE_LABELS } from "@/lib/domain/labels"
 import { getIconForChartType } from "@/components/dashboard-preview/chart-icon"
-import { AreaChart } from "@/components/dashboard-preview/charts/area-chart"
-import { BarChart } from "@/components/dashboard-preview/charts/bar-chart"
-import { DonutChart } from "@/components/dashboard-preview/charts/donut-chart"
-import { HorizontalBarChart } from "@/components/dashboard-preview/charts/horizontal-bar-chart"
-import { LineChart } from "@/components/dashboard-preview/charts/line-chart"
+import {
+  AreaChart,
+  BarChart,
+  DonutChart,
+  HorizontalBarChart,
+  LineChart,
+  PieChart,
+  RadialChart,
+} from "@/components/dashboard-preview/charts/lazy-charts"
 import { MetricDisplay } from "@/components/dashboard-preview/charts/metric-display"
-import { PieChart } from "@/components/dashboard-preview/charts/pie-chart"
 import { ProgressBar } from "@/components/dashboard-preview/charts/progress-bar"
-import { RadialChart } from "@/components/dashboard-preview/charts/radial-chart"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { usePaletteColors } from "@/components/dashboard-preview/use-color-mode"
