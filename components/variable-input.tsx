@@ -347,7 +347,7 @@ export function VariableInput() {
                       size="sm"
                       onClick={() => handleRemoveVariable(variable.id)}
                       aria-label={`Eliminar variable ${variable.name}`}
-                      className="h-8 w-8 p-0 text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 focus-visible:opacity-100"
+                      className="h-8 w-8 p-0 text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 focus-visible:opacity-100"
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -438,7 +438,7 @@ export function VariableInput() {
                       return (
                         <div
                           key={idx}
-                          className={`flex items-center gap-2 rounded-lg border p-2 transition-all ${priorityColors[combo.maxPriority as keyof typeof priorityColors] || priorityColors[2]} ${isExcluded ? 'opacity-60' : ''}`}
+                          className={`flex min-w-0 items-center gap-2 rounded-lg border p-2 transition-all ${priorityColors[combo.maxPriority as keyof typeof priorityColors] || priorityColors[2]} ${isExcluded ? 'opacity-60' : ''}`}
                         >
                           <Button
                             variant="ghost"

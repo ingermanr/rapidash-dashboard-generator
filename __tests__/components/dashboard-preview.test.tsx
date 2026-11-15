@@ -72,6 +72,21 @@ describe('DashboardGrid', () => {
     render(<DashboardGrid variant={variant(combos)} />)
     for (const name of ['A', 'B', 'C']) expect(screen.getByRole('heading', { name })).toBeInTheDocument()
   })
+
+  it('leaves the 12-column placement to the stylesheet, so small screens can stack the cards', () => {
+    const combos = ['A', 'B'].map((name) => combination({ id: `c-${name}`, name }))
+    const { container } = render(<DashboardGrid variant={variant(combos)} />)
+
+    const grid = container.firstElementChild as HTMLElement
+    expect(grid).toHaveClass('dashboard-grid')
+    expect(grid.style.gridTemplateColumns).toBe('')
+    expect(grid.style.getPropertyValue('--grid-columns')).toMatch(/^\d+$/)
+    for (const item of Array.from(grid.children) as HTMLElement[]) {
+      expect(item.style.gridColumn).toBe('')
+      expect(item.style.getPropertyValue('--grid-column')).toMatch(/^\d+ \/ \d+$/)
+      expect(item.style.getPropertyValue('--grid-row')).toMatch(/^\d+ \/ \d+$/)
+    }
+  })
 })
 
 describe('FilterCard', () => {

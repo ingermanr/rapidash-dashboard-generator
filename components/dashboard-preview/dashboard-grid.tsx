@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react"
 import { CombinationCard } from "@/components/dashboard-preview/combination-card"
 import { generateGridStyles, getComponentSize, getGridDimensions, getRealLayoutDivisions } from "@/lib/layout-engine"
 import type { LayoutVariant } from "@/types/dashboard"
@@ -16,14 +17,9 @@ export function DashboardGrid({ variant }: { variant: LayoutVariant }) {
     
     // Debug info en desarrollo con validación de calidad
     return (
-      <div 
-        className="relative w-full" 
-        style={{ 
-          display: 'grid', 
-          gridTemplateColumns: `repeat(${maxColumns}, 1fr)`, 
-          gridTemplateRows: `repeat(${maxRows}, minmax(280px, auto))`, 
-          gap: '1rem' 
-        }}
+      <div
+        className="dashboard-grid relative w-full"
+        style={{ "--grid-columns": maxColumns, "--grid-rows": maxRows } as CSSProperties}
       >
         {divisions.map((division, index) => {
           // Asegurar que no renderizamos más elementos que combinaciones disponibles
@@ -41,13 +37,13 @@ export function DashboardGrid({ variant }: { variant: LayoutVariant }) {
           // Usar función centralizada para calcular el tamaño
           const size = getComponentSize(division)
           // Usar estilos unificados de grid
-          const gridStyles = generateGridStyles(division)
-          
+          const { gridColumn, gridRow } = generateGridStyles(division)
+
           return (
             <div
               key={combination.id}
-              style={gridStyles}
-              className="relative h-full"
+              style={{ "--grid-column": gridColumn, "--grid-row": gridRow } as CSSProperties}
+              className="dashboard-grid-item relative h-full"
             >
               <CombinationCard 
                 combination={combination} 

@@ -87,8 +87,8 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Enhanced Header */}
         <div className="mb-12 rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-card/95 via-card to-card/80 p-8 shadow-2xl backdrop-blur-sm">
-          <div className="flex items-start justify-between">
-            <div className="space-y-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+            <div className="min-w-0 space-y-6">
               <div className="inline-flex items-center gap-3 rounded-full border-2 border-primary/30 bg-gradient-to-r from-primary/15 to-chart-2/10 px-6 py-3 text-sm font-bold text-primary backdrop-blur-md shadow-lg shadow-primary/20 transition-all hover:scale-105 hover:shadow-primary/30">
                 <Logo className="h-7 w-7" />
                 Diseño Automático de Dashboards
@@ -104,7 +104,7 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
                 </p>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Button onClick={onShowDashboards} variant="outline" size="sm" className="gap-2 border-2">
                 <FolderOpen className="h-4 w-4" />
                 Mis dashboards
@@ -249,9 +249,9 @@ export function BuilderView({ onStartOver, onShowDashboards }: BuilderViewProps)
         {currentVariant && (
           <div className="mb-12">
             <div className="mb-8 rounded-2xl border border-primary/20 bg-gradient-to-br from-card/50 to-card/30 p-6 backdrop-blur-sm">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-chart-2/10 shadow-lg">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-chart-2/10 shadow-lg">
                     <BarChart3 className="h-6 w-6 text-primary" />
                   </div>
                   <div>
