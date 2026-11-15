@@ -1,5 +1,6 @@
 "use client"
 
+import { VARIABLE_TYPE_LABELS } from "@/lib/domain/labels"
 import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -14,13 +15,13 @@ const MIN_VARIABLE_NAME_LENGTH = 2
 const MAX_VARIABLE_NAME_LENGTH = 50
 
 const variableTypes: { value: VariableType; label: string; icon: LucideIcon }[] = [
-  { value: "numeric", label: "Numérico", icon: Hash },
-  { value: "categorical", label: "Categórico", icon: Tag },
-  { value: "temporal", label: "Temporal", icon: Calendar },
-  { value: "percentage-progress", label: "Porcentaje (Progreso)", icon: BarChart3 },
-  { value: "percentage-ratio", label: "Porcentaje (Ratio)", icon: TrendingUp },
-  { value: "binary", label: "Binario", icon: ToggleLeft },
-  { value: "text", label: "Texto", icon: Type },
+  { value: "numeric", label: VARIABLE_TYPE_LABELS["numeric"], icon: Hash },
+  { value: "categorical", label: VARIABLE_TYPE_LABELS["categorical"], icon: Tag },
+  { value: "temporal", label: VARIABLE_TYPE_LABELS["temporal"], icon: Calendar },
+  { value: "percentage-progress", label: VARIABLE_TYPE_LABELS["percentage-progress"], icon: BarChart3 },
+  { value: "percentage-ratio", label: VARIABLE_TYPE_LABELS["percentage-ratio"], icon: TrendingUp },
+  { value: "binary", label: VARIABLE_TYPE_LABELS["binary"], icon: ToggleLeft },
+  { value: "text", label: VARIABLE_TYPE_LABELS["text"], icon: Type },
 ]
 
 const priorityOptions: { value: VariablePriority; label: string; color: string }[] = [

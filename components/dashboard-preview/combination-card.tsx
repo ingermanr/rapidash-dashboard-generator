@@ -1,3 +1,4 @@
+import { CHART_TYPE_LABELS } from "@/lib/domain/labels"
 import { getIconForChartType } from "@/components/dashboard-preview/chart-icon"
 import { AreaChart } from "@/components/dashboard-preview/charts/area-chart"
 import { BarChart } from "@/components/dashboard-preview/charts/bar-chart"
@@ -18,18 +19,6 @@ export interface CombinationCardProps {
   palette: LayoutVariant["palette"]
   index: number
   size: "small" | "medium" | "large"
-}
-
-const CHART_TYPE_LABELS: Record<VariableCombination["chartType"], string> = {
-  bar: "Barras",
-  "horizontal-bar": "Barras horizontales",
-  line: "Líneas",
-  area: "Área",
-  pie: "Circular",
-  donut: "Dona",
-  radial: "Radial",
-  progress: "Progreso",
-  metric: "Métrica",
 }
 
 export function CombinationCard({ combination, palette, index, size }: CombinationCardProps) {
